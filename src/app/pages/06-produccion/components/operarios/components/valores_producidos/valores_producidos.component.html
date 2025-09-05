@@ -1,0 +1,178 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Control de valores ingresados en Producción">
+    <div class="flex justify-content-center">
+        <form [formGroup]="myFormOp" class="flex align-items-center gap-3" (ngSubmit)="onSearchOP()">
+            <label for="cilindro" class="font-semibold w-7rem">Número de OP</label>
+            <p-inputNumber formControlName="numOp" [minFractionDigits]="0" locale="en-US" [min]="0" />
+            <p-button type="submit" label="Buscar" icon="fa-solid fa-magnifying-glass" [raised]="true"
+                severity="primary"></p-button>
+        </form>
+    </div>
+    <hr>
+    <div class="grid" *ngIf="infoOP !== undefined && infoProdTerm !== undefined">
+        <p-fieldset legend="Valores producidos" class="col-4">
+            <form class="flex flex-column gap-3" [formGroup]="myFormValores" (ngSubmit)="onSaveValores()">
+                <div class="flex align-items-center gap-3">
+                    <label for="maquina" class="font-semibold w-10rem">Maquina</label>
+                    <div class="flex-auto">
+                        <p-dropdown formControlName="maquina" id="maquina" [options]="listMaquina"
+                            placeholder="Escoja una opcion" [showClear]="true" optionLabel="Nombre" [filter]="true"
+                            (ngModelChange)="onSelectMaquina($event)">
+                        </p-dropdown>
+                    </div>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="maquina" class="font-semibold w-10rem">Materia prima</label>
+                    <div class="flex-auto">
+                        <p-dropdown formControlName="materiaPrima" id="materiaPrima" [options]="listMPLiberadoTipInv"
+                            placeholder="Escoja una opcion" [showClear]="true" [filter]="true"
+                            [filterFields]="['CodigoInterno', 'NombreTipoInventario']">
+                            <ng-template let-item pTemplate="selectedItem">
+                                <div class="custom-dropdown-item-selected">
+                                    <div> {{ item.CodigoInterno }}</div>
+                                    <div> {{ item.NombreTipoInventario }}</div>
+                                </div>
+                            </ng-template>
+                            <ng-template let-item pTemplate="item">
+                                <div class="custom-dropdown-item">
+                                    <div> {{ item.CodigoInterno }}</div>
+                                    <div> {{ item.NombreTipoInventario }}</div>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="cilindro" class="font-semibold w-10rem">Calibración (m)</label>
+                    <p-inputNumber formControlName="calibracion" [minFractionDigits]="0" locale="en-US" [min]="0" />
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="cilindro" class="font-semibold w-10rem">Metros producidos (m)</label>
+                    <p-inputNumber formControlName="metrosMP" [minFractionDigits]="0" locale="en-US" [min]="0" />
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="cilindro" class="font-semibold w-10rem">Ancho Utilizado (mm)</label>
+                    <p-inputNumber formControlName="anchoMP" [minFractionDigits]="0" locale="en-US" [min]="0" />
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="cilindro" class="font-semibold w-10rem">Cantidad producida</label>
+                    <p-inputNumber formControlName="cantProducida" [minFractionDigits]="0" locale="en-US" [min]="0" />
+                </div>
+                <div class="flex justify-content-center">
+                    <p-button type="submit" label="Guardar" icon="fa-solid fa-floppy-disk" [raised]="true"
+                        severity="success"></p-button>
+                </div>
+            </form>
+        </p-fieldset>
+        <p-fieldset legend="Información de OP" class="col-8">
+            <div class="flex flex-column gap-3">
+                <div class="flex flex-column">
+                    <label class="">Orden de Producción</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoOP.SecuencialOrdenProduccion}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Nombre del producto</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoOP.NombreTrabajo}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Código nuevo</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoOP.CodigoTrabajo}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Código antiguo</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoProdTerm.CodigoAntiguo}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Cantidad a fabricar (Etiq / Rollo)</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoOP.Cantidad | number: '0.0-2'}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Tipo trabajo</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoProdTerm.TipoTrabajo}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Material</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoProdTerm.TipoInventario}}</b>
+                </div>
+            </div>
+        </p-fieldset>
+        <p-fieldset legend="Historial de valores" class="col-12">
+            <p-table [value]="listValores" styleClass="p-datatable-sm">
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th>Acción</th>
+                        <th>Usuario</th>
+                        <th>Material</th>
+                        <th>Maquina</th>
+                        <th style="width: 10%">Calibracion (m)</th>
+                        <th style="width: 10%">Metros producidos (m)</th>
+                        <th style="width: 10%">Ancho utilizados (mm)</th>
+                        <th style="width: 10%">Cantidad producida</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item>
+                    <tr>
+                        <td>
+                            <p-button *ngIf="item.Usuario === loginService.usuario.UserName" icon="fa-solid fa-pencil"
+                                severity="info" [raised]="true" (onClick)="onOpenEditValores(item)"></p-button>
+                        </td>
+                        <td>{{item.NombreColaborador}}</td>
+                        <td>{{item.CodigoMaterial}}</td>
+                        <td>{{item.Maquina}}</td>
+                        <td class="text-right">{{item.ValorMetrosCalibracion}}</td>
+                        <td class="text-right">{{item.MetroLineal}}</td>
+                        <td class="text-right">{{item.Ancho}}</td>
+                        <td class="text-right">{{item.CantidadProduccion}}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-fieldset>
+    </div>
+</p-card>
+<!--MODAL VALORES -->
+<p-dialog [(visible)]="modalValores" [modal]="true" [style]="{ width: '30rem' }" [header]="'Valores Generados'"
+    [maximizable]="true">
+    <form class="flex flex-column mt-2 gap-3" [formGroup]="myFormValoresEdit" (ngSubmit)="onEditValores()">
+        <div class="flex align-items-center gap-3">
+            <label for="maquina" class="font-semibold w-10rem">Materia prima</label>
+            <div class="flex-auto">
+                <p-dropdown formControlName="materiaPrima" id="materiaPrima" [options]="listMPLiberadoTipInv"
+                    placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true" [filter]="true"
+                    [filterFields]="['CodigoInterno', 'NombreTipoInventario']">
+                    <ng-template let-item pTemplate="selectedItem">
+                        <div class="custom-dropdown-item-selected">
+                            <div> {{ item.CodigoInterno }}</div>
+                            <div> {{ item.NombreTipoInventario }}</div>
+                        </div>
+                    </ng-template>
+                    <ng-template let-item pTemplate="item">
+                        <div class="custom-dropdown-item">
+                            <div> {{ item.CodigoInterno }}</div>
+                            <div> {{ item.NombreTipoInventario }}</div>
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+            </div>
+        </div>
+        <div class="flex align-items-center gap-3">
+            <label for="cilindro" class="font-semibold w-10rem">Ancho Utilizado (mm)</label>
+            <p-inputNumber formControlName="anchoMP" [minFractionDigits]="0" locale="en-US" [min]="0" />
+        </div>
+        <div class="flex align-items-center gap-3">
+            <label for="cilindro" class="font-semibold w-10rem">Calibración (m)</label>
+            <p-inputNumber formControlName="calibracion" [minFractionDigits]="0" locale="en-US" [min]="0" />
+        </div>
+        <div class="flex align-items-center gap-3">
+            <label for="cilindro" class="font-semibold w-10rem">Metros producidos (m)</label>
+            <p-inputNumber formControlName="metrosMP" [minFractionDigits]="0" locale="en-US" [min]="0" />
+        </div>
+        <div class="flex align-items-center gap-3">
+            <label for="cilindro" class="font-semibold w-10rem">Cantidad producida</label>
+            <p-inputNumber formControlName="cantProducida" [minFractionDigits]="0" locale="en-US" [min]="0" />
+        </div>
+        <div class="flex justify-content-center">
+            <p-button type="submit" icon="fa-solid fa-floppy-disk" label="Guardar" severity="success"></p-button>
+        </div>
+    </form>
+</p-dialog>

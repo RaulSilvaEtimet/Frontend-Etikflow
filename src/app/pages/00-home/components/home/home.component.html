@@ -1,0 +1,23 @@
+<div class="surface-section px-4 py-8 md:px-6 lg:px-8 text-center">
+    <div class="mb-3 font-bold text-2xl">
+        <span class="text-900">Un producto, </span>
+        <span class="text-blue-600">Muchas soluciones</span>
+    </div>
+    <div class="text-700 text-sm mb-6">Elige el módulo al que deseas ingresar</div>
+    <div class="grid">
+        <div class="col-12 md:col-4 mb-4 px-5 cursor-pointer" *ngFor="let modulo of modulos">
+            <span (click)="seleccionarModulo(modulo)" class="p-3 shadow-2 mb-3 inline-block surface-card"
+                style="border-radius: 10px">
+                <i class="{{modulo.Icono}} text-5xl text-blue-500"></i>
+            </span>
+            <div class="text-900 mb-3 font-medium">{{modulo.Descripcion| uppercase}}</div>
+        </div>
+        <div class="col-12 md:col-4 mb-4 px-5 cursor-pointer">
+            <span (click)="onCerrarSesion()" class="p-3 shadow-2 mb-3 inline-block surface-card"
+                style="border-radius: 10px">
+                <i class="fa-solid fa-power-off text-5xl text-blue-500"></i>
+            </span>
+            <div class="text-900 mb-3 font-medium">CERRAR SESION</div>
+        </div>
+    </div>
+</div>

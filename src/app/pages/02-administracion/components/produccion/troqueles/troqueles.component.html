@@ -1,0 +1,354 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSendData"></app-blocked-send-info-database>
+<p-card header="Listado de troqueles y sus catalogos">
+    <div class="flex gap-2 flex-column">
+        <p-button label="Sincronizar" icon="pi pi-sync" [loading]="loadingFormatoTroquel" (onClick)="ngOnInit()"
+            [raised]="true"></p-button>
+        <p-tabView>
+            <p-tabPanel header="Troqueles">
+                <p-table #dtData [value]="listTroquel" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingTroquel"
+                    [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+                    [globalFilterFields]="['IdTroquel','DescripcionTroquel','CodigoInternoTroquel','ZetaTroquel','DesarrolloEtiqueta','AnchoEtiqueta']"
+                    [rowsPerPageOptions]="[10,20,50,100]">
+                    <ng-template pTemplate="caption">
+                        <div class="flex">
+                            <p-button label="Agregar" severity="success" icon="fa-solid fa-plus"
+                                (onClick)="onCreateTroquel()" [raised]="true"></p-button>
+                            <span class="p-input-icon-left ml-auto">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text" [(ngModel)]="searchTroquel" (input)="onGlobalFilter(dtData
+                            , $event)" placeholder="Filtrar..." />
+                            </span>
+                        </div>
+                    </ng-template>
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th pSortableColumn="IdTroquel">
+                                Id<p-sortIcon field="IdTroquel" />
+                            </th>
+                            <th pSortableColumn="DescripcionTroquel">
+                                Descripción<p-sortIcon field="DescripcionTroquel" />
+                            </th>
+                            <th pSortableColumn="CodigoInternoTroquel">
+                                Codigo Interno <p-sortIcon field="CodigoInternoTroquel" /></th>
+                            <th pSortableColumn="ZetaTroquel">
+                                Zeta<p-sortIcon field="ZetaTroquel" />
+                            </th>
+                            <th pSortableColumn="DesarrolloEtiqueta">
+                                Avance Etiqueta (mm)<p-sortIcon field="DesarrolloEtiqueta" />
+                            </th>
+                            <th pSortableColumn="AnchoEtiqueta">
+                                Ancho Etiqueta (mm)<p-sortIcon field="AnchoEtiqueta" />
+                            </th>
+                            <th>
+                                Estado
+                            </th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item>
+                        <tr>
+                            <td>
+                                <p-button [label]="item.IdTroquel" [link]="true"
+                                    (onClick)="onEditTroquel(item)"></p-button>
+                            </td>
+                            <td>{{item.DescripcionTroquel }}</td>
+                            <td>{{item.CodigoInternoTroquel}}</td>
+                            <td>{{item.ZetaTroquel}}</td>
+                            <td>{{item.DesarrolloEtiqueta}}</td>
+                            <td>{{item.AnchoEtiqueta}}</td>
+                            <td>
+                                <p-tag *ngIf="item.Estado" value="Activado" severity="success" />
+                                <p-tag *ngIf="!item.Estado" value="Desactivado" severity="danger" />
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabPanel>
+            <p-tabPanel header="Catalogos">
+                <div class="grid">
+                    <p-fieldset legend="Formatos" class="col-12 md:col-6">
+                        <p-table [value]="listFormatoTroquel" [loading]="loadingFormatoTroquel"
+                            styleClass="p-datatable-sm">
+                            <ng-template pTemplate="caption">
+                                <p-button label="Agregar" severity="success" icon="fa-solid fa-plus"
+                                    (onClick)="onCreateFormatoTroquel()" [raised]="true"></p-button>
+                            </ng-template>
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Descripción</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-formato>
+                                <tr>
+                                    <td>
+                                        <p-button [label]="formato.IdFormatoTroquel" [link]="true"
+                                            (onClick)="onEditFormatoTroquel(formato)"
+                                            pTooltip="Editar información"></p-button>
+                                    </td>
+                                    <td>{{formato.DescripcionFormatoTorquel }}</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-fieldset>
+                    <p-fieldset legend="Tipos" class="col-12 md:col-6">
+                        <p-table [value]="listTipoTroquel" [loading]="loadingTipoTroquel" styleClass="p-datatable-sm">
+                            <ng-template pTemplate="caption">
+                                <p-button label="Agregar" severity="success" icon="fa-solid fa-plus"
+                                    (onClick)="onCreateTipoTroquel()" [raised]="true"></p-button>
+                            </ng-template>
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Descripción</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-tipo>
+                                <tr>
+                                    <td>
+                                        <p-button [label]="tipo.IdTipoTroquel" [link]="true"
+                                            (onClick)="onEditTipoTroquel(tipo)"
+                                            pTooltip="Editar información"></p-button>
+                                    </td>
+                                    <td>{{tipo.DescripcionTipoTroquel }}</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-fieldset>
+
+                </div>
+            </p-tabPanel>
+        </p-tabView>
+    </div>
+</p-card>
+<!--MODAL CREACION TIPO TROQUEL-->
+<p-dialog [header]="idTipoTroquel === 0 ? 'Crear tipo de troquel':'Editar tipo de troquel'" [modal]="true"
+    [(visible)]="modalTipoTroquel" [style]="{ width: '40rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-3" [formGroup]="myFormTipoTroquel" (ngSubmit)="onSaveTipoTroquel()">
+            <div class="flex align-items-center gap-3">
+                <label for="descripcion" class="font-semibold w-7rem">Descripcion</label>
+                <input pInputText id="descripcion" class="flex-auto" autocomplete="off" formControlName="descripcion" />
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalTipoTroquel = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL CREACION FORMATO TROQUEL-->
+<p-dialog [header]="idFormatoTroquel === 0 ? 'Crear formato de troquel':'Editar formato de troquel'" [modal]="true"
+    [(visible)]="modalFormatoTroquel" [style]="{ width: '30rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-3" [formGroup]="myFormFormatoTroquel" (ngSubmit)="onSaveFormatoTroquel()">
+            <div class="flex align-items-center gap-3">
+                <label for="descripcion" class="font-semibold w-7rem">Descripcion</label>
+                <input pInputText id="descripcion" class="flex-auto" autocomplete="off" formControlName="descripcion" />
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalFormatoTroquel = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL CREACION CILINDRO-->
+<p-dialog [header]="idTroquel === 0 ? 'Crear troquel':'Editar troquel'" [modal]="true" [(visible)]="modalCreateTroquel"
+    [style]="{ width: '90rem' }">
+    <div class="mt-2">
+        <form class="grid" [formGroup]="myFormTroquel" (ngSubmit)="onSaveTroquel()">
+            <p-fieldset legend="Datos Generales" class="col-12 md:col-4">
+                <div class="flex flex-column gap-3">
+                    <div class="flex align-items-center gap-3">
+                        <label for="tipo" class="font-semibold w-8rem">Tipo de troquel</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="tipo" id="tipo" [options]="listTipoTroquel"
+                                placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                                [filterFields]="['DescripcionTipoTroquel']" [showClear]="true"
+                                [loading]="loadingTipoTroquel" filterPlaceholder="Buscando..."
+                                optionValue="IdTipoTroquel">
+                                <ng-template let-tipo pTemplate="selectedItem">
+                                    <div class="custom-dropdown-item-selected">
+                                        {{ tipo.IdTipoTroquel }} - {{tipo.DescripcionTipoTroquel}}
+                                    </div>
+                                </ng-template>
+                                <ng-template let-troquel pTemplate="item">
+                                    <div class="custom-dropdown-item">
+                                        {{ troquel.IdTipoTroquel }} - {{troquel.DescripcionTipoTroquel}}
+                                    </div>
+                                </ng-template>
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="formato" class="font-semibold w-8rem">Formato de troquel</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="formato" id="formato" [options]="listFormatoTroquel"
+                                placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                                [filterFields]="['DescripcionFormatoTorquel']" [showClear]="true"
+                                [loading]="loadingFormatoTroquel" optionValue="IdFormatoTroquel"
+                                filterPlaceholder="Buscando...">
+                                <ng-template let-formato pTemplate="selectedItem">
+                                    <div class="custom-dropdown-item-selected">
+                                        {{ formato.IdFormatoTroquel }} - {{formato.DescripcionFormatoTorquel}}
+                                    </div>
+                                </ng-template>
+                                <ng-template let-cilindro pTemplate="item">
+                                    <div class="custom-dropdown-item">
+                                        {{ cilindro.IdFormatoTroquel }} - {{cilindro.DescripcionFormatoTorquel}}
+                                    </div>
+                                </ng-template>
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="codigo" class="font-semibold w-8rem">Codigo Interno</label>
+                        <input pInputText id="codigo" class="flex-auto" autocomplete="off" formControlName="codigo" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="descripcion" class="font-semibold w-8rem">Descripcion</label>
+                        <input pInputText id="descripcion" class="flex-auto" autocomplete="off"
+                            formControlName="descripcion" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="" class="font-semibold w-8rem">Corte recto</label>
+                        <div class="flex gap-3 align-items-center">
+                            <div class=" flex align-items-center">
+                                <p-radioButton [value]="true" inputId="radiobtn1" formControlName="corteRecto" />
+                                <label for="radiobtn1" class="ml-2">Si</label>
+                            </div>
+                            <div class="flex align-items-center">
+                                <p-radioButton [value]="false" inputId="radiobtn2" formControlName="corteRecto" />
+                                <label for="radiobtn2" class="ml-2">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-8rem">Estado</label>
+                        <div class="flex gap-3 align-items-center">
+                            <div class="flex align-items-center">
+                                <p-radioButton [value]="true" inputId="radiobtn1" formControlName="estado" />
+                                <label for="radiobtn1" class="ml-2">Habilitado</label>
+                            </div>
+                            <div class="flex align-items-center">
+                                <p-radioButton [value]="false" inputId="radiobtn2" formControlName="estado" />
+                                <label for="radiobtn2" class="ml-2">Deshabilitado</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </p-fieldset>
+            <p-fieldset legend="Datos Etiqueta" class="col-12 md:col-4">
+                <div class="flex flex-column gap-3">
+                    <div class="flex align-items-center gap-3">
+                        <label for="zeta" class="font-semibold w-8rem">Z Troquel</label>
+                        <p-inputNumber formControlName="zeta" id="zeta" [minFractionDigits]="0" mode="decimal"
+                            locale="es-EC" [min]="0" (ngModelChange)="onCalcularDesarrollo()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="desarrolloEtiqueta" class="font-semibold w-8rem">Avance de la etiqueta
+                            (mm)</label>
+                        <p-inputNumber formControlName="desarrolloEtiqueta" id="desarrolloEtiqueta"
+                            [minFractionDigits]="2" mode="decimal" locale="es-EC" [min]="0"
+                            (ngModelChange)="onCalcularInformacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="anchoEtiqueta" class="font-semibold w-8rem">Ancho de la etiqueta (mm)</label>
+                        <p-inputNumber formControlName="anchoEtiqueta" id="anchoEtiqueta" [minFractionDigits]="2"
+                            mode="decimal" locale="es-EC" [min]="0" (ngModelChange)="onCalcularInformacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="gapDesarrollo" class="font-semibold w-8rem">GAP Avance (mm)</label>
+                        <p-inputNumber formControlName="gapDesarrollo" id="gapDesarrollo" [minFractionDigits]="2"
+                            mode="decimal" locale="es-EC" [min]="0" (ngModelChange)="onCalcularInformacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="gapAncho" class="font-semibold w-8rem">GAP Ancho (mm)</label>
+                        <p-inputNumber formControlName="gapAncho" id="gapAncho" [minFractionDigits]="2" mode="decimal"
+                            locale="es-EC" [min]="0" (ngModelChange)="onCalcularInformacion()" />
+                    </div>
+                </div>
+            </p-fieldset>
+            <p-fieldset legend="Datos Trabajo" class="col-12 md:col-4">
+                <div class="flex flex-column gap-3">
+                    <div class="flex align-items-center gap-3">
+                        <label for="desarrolloTotal" class="font-semibold w-8rem">Avance total troquel (mm)</label>
+                        <p-inputNumber formControlName="desarrolloTotal" id="desarrolloTotal" [minFractionDigits]="2"
+                            mode="decimal" locale="es-EC" [min]="0" (ngModelChange)="onCalcularInformacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="anchoTotal" class="font-semibold w-8rem">Ancho total troquel (mm)</label>
+                        <p-inputNumber formControlName="anchoTotal" id="anchoTotal" [minFractionDigits]="2"
+                            mode="decimal" locale="es-EC" [min]="0" (ngModelChange)="onCalcularInformacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="desarrolloTrabajo" class="font-semibold w-8rem">Avance del trabajo (mm)</label>
+                        <p-inputNumber formControlName="desarrolloTrabajo" id="desarrolloTrabajo"
+                            [minFractionDigits]="2" mode="decimal" locale="es-EC" [min]="0"
+                            (ngModelChange)="onCalcularInformacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="anchoTrabajo" class="font-semibold w-8rem">Ancho del trabajo (mm)</label>
+                        <p-inputNumber formControlName="anchoTrabajo" id="anchoTrabajo" [minFractionDigits]="2"
+                            mode="decimal" locale="es-EC" [min]="0" (ngModelChange)="onCalcularInformacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="gapTrabajos" class="font-semibold w-8rem">GAP entre Trabajos (mm)</label>
+                        <p-inputNumber formControlName="gapTrabajos" id="gapTrabajos" [minFractionDigits]="2"
+                            mode="decimal" locale="es-EC" [min]="0" (ngModelChange)="onCalcularInformacion()" />
+                    </div>
+                </div>
+            </p-fieldset>
+            <div class="col-12">
+                <div class="flex justify-content-center gap-2">
+                    <p-button label="Guardar" severity="success" type="submit" />
+                    <p-button label="Cerrar" severity="secondary" (onClick)="modalCreateTroquel = false" />
+                </div>
+            </div>
+            <p-fieldset legend="Calculos" class="col-12">
+                <div class="flex flex-column gap-4">
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-17rem">Cantidad de trabajos al ancho</label>
+                        <b class="font-semibold flex-auto text-xl">{{listCalculos[0]}}</b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-17rem">GAP total entre trabajos</label>
+                        <b class="font-semibold flex-auto text-xl">{{listCalculos[1]}}</b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-17rem">Etiquetas al ancho por trabajo</label>
+                        <b class="font-semibold flex-auto text-xl">{{listCalculos[2]}}</b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-17rem">GAP total avance entre etiquetas</label>
+                        <b class="font-semibold flex-auto text-xl">{{listCalculos[3]}}</b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-17rem">GAP total ancho entre etiquetas</label>
+                        <b class="font-semibold flex-auto text-xl">{{listCalculos[4]}}</b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-17rem">Etiquetas al desarrollo</label>
+                        <b class="font-semibold flex-auto text-xl">{{listCalculos[5]}}</b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-17rem">Etiquetas al ancho</label>
+                        <b class="font-semibold flex-auto text-xl">{{listCalculos[6]}}</b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-17rem">Total de etiquetas</label>
+                        <b class="font-semibold flex-auto text-xl">{{listCalculos[7]}}</b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-17rem">Avance del material necesario</label>
+                        <b class="font-semibold flex-auto text-xl">{{listCalculos[8]}}</b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-17rem">Ancho del material necesario</label>
+                        <b class="font-semibold flex-auto text-xl">{{listCalculos[9]}}</b>
+                    </div>
+                </div>
+            </p-fieldset>
+        </form>
+    </div>
+</p-dialog>

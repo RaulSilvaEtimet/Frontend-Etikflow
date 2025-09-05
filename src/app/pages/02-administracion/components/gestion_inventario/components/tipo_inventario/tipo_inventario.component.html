@@ -1,0 +1,125 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<p-card header="Listado de tipo de inventario">
+    <p-table #dtData [value]="listTipoInventario" [tableStyle]="{'min-width': '50rem'}"
+        [loading]="loadingTipoInventario" [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['IdTipoInventario','CodigoTipoInventario','NombreTipoInventario','DescripcionLineaInventario ','NombreGrupo']"
+        [rowsPerPageOptions]="[10, 20, 50, 100]">
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                <div class="flex gap-3">
+                    <p-button label="Agregar" severity="success" icon="fa-solid fa-plus"
+                        (onClick)="onOpenModalCreate()"></p-button>
+                    <p-button label="Sincronizar" icon="pi pi-sync" [loading]="loadingTipoInventario"
+                        (onClick)="onGetTipoInventario()" />
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchTipoInventario" (input)="onGlobalFilter(dtData
+                        , $event)" placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="CodigoTipoInventario">Código<p-sortIcon field="CodigoTipoInventario" /></th>
+                <th pSortableColumn="NombreTipoInventario">Nombre<p-sortIcon field="NombreTipoInventario" /></th>
+                <th>
+                    <div class="flex align-items-center">
+                        Grupo inventario
+                        <p-columnFilter field="NombreGrupo" matchMode="in" display="menu" [showMatchModes]="false"
+                            [showOperator]="false" [showAddButton]="false">
+                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                <p-multiSelect [ngModel]="value" [options]="filterGrupoInventario"
+                                    placeholder="Buscar por ..." (onChange)="filter($event.value)">
+                                    <ng-template let-option pTemplate="item">
+                                        <div class="inline-block vertical-align-middle">
+                                            <span class="ml-1 mt-1">{{ option }}</span>
+                                        </div>
+                                    </ng-template>
+                                </p-multiSelect>
+                            </ng-template>
+                        </p-columnFilter>
+                    </div>
+
+                </th>
+                <th pSortableColumn="DescripcionLineaInventario">Linea inventario<p-sortIcon
+                        field="DescripcionLineaInventario" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-tipoMaterial let-columns="columns" let-rowIndex="rowIndex">
+            <tr>
+                <td>{{tipoMaterial.CodigoTipoInventario}}</td>
+                <td>{{tipoMaterial.NombreTipoInventario}}</td>
+                <td>{{tipoMaterial.NombreGrupo}}</td>
+                <td>{{tipoMaterial.DescripcionLineaInventario}}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL CREACION-->
+<p-dialog header="Crear tipo de inventario" [modal]="true" [(visible)]="modalInfo" [style]="{ width: '50rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-3" [formGroup]="myForm" (ngSubmit)="onInsertTipoInventario()">
+            <div class="flex align-items-center gap-3">
+                <label for="grupoInventario" class="font-semibold w-7rem">Código</label>
+                <b class="font-semibold flex-auto text-2xl">
+                    {{codLineaInventario}}{{codGrupoInventario}}{{codTipoInventario}}</b>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="lineaInventario" class="font-semibold w-7rem">Linea inventario</label>
+                <div class="flex-auto">
+                    <p-dropdown formControlName="lineaInventario" id="lineaInventario" [options]="listLineaInventario"
+                        placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                        [filterFields]="['CodigoLineaInventario', 'DescripcionLineaInventario']" [showClear]="true"
+                        [loading]="loadingLineaInventario" filterPlaceholder="Buscando..."
+                        (ngModelChange)="onChangeLineaInventario($event)" [virtualScroll]="true"
+                        [virtualScrollItemSize]="20">
+                        <ng-template let-LI pTemplate="selectedItem">
+                            <div class="custom-dropdown-item-selected">
+                                {{ LI.CodigoLineaInventario }} - {{LI.DescripcionLineaInventario}}
+                            </div>
+                        </ng-template>
+                        <ng-template let-GI pTemplate="item">
+                            <div class="custom-dropdown-item">
+                                {{ GI.CodigoLineaInventario }} - {{GI.DescripcionLineaInventario}}
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="grupoInventario" class="font-semibold w-7rem">Grupo inventario</label>
+                <div class="flex-auto">
+                    <p-dropdown formControlName="grupoInventario" id="grupoInventario" [options]="listGrupoInventario"
+                        placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                        [filterFields]="['GrupoInventario', 'NombreGrupo']" [showClear]="true"
+                        [loading]="loadingGrupoInventario" filterPlaceholder="Buscando..."
+                        (ngModelChange)="onChangeGrupoInventario($event)" [virtualScroll]="true"
+                        [virtualScrollItemSize]="20">
+                        <ng-template let-LI pTemplate="selectedItem">
+                            <div class="custom-dropdown-item-selected">
+                                {{ LI.GrupoInventario }} - {{LI.NombreGrupo}}
+                            </div>
+                        </ng-template>
+                        <ng-template let-GI pTemplate="item">
+                            <div class="custom-dropdown-item">
+                                {{ GI.GrupoInventario }} - {{GI.NombreGrupo}}
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="nombreTipoMaterial" class="font-semibold w-7rem">Nombre</label>
+                <input pInputText id="nombreTipoMaterial" class="flex-auto" autocomplete="off"
+                    formControlName="nombreTipoMaterial" />
+            </div>
+            <div class="flex h-5rem"></div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalInfo = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>

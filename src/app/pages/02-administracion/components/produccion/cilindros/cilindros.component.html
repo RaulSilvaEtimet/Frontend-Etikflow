@@ -1,0 +1,213 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSendData"></app-blocked-send-info-database>
+<p-card header="Listado de cilindros y sus catalogos">
+    <div class="flex gap-2 flex-column">
+        <p-button label="Sincronizar" icon="pi pi-sync" [loading]="loadingTipoCilindro" (onClick)="ngOnInit()"
+            [raised]="true"></p-button>
+        <p-tabView>
+            <p-tabPanel header="Cilindros">
+                <p-table #dtData [value]="listCilindro" [tableStyle]="{'min-width': '50rem'}"
+                    [loading]="loadingCilindro" [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+                    [globalFilterFields]="['IdCilindro','DescripcionCilindro','AnchoCilindroMm','DesarrolloCilindroMm']">
+                    <ng-template pTemplate="caption">
+                        <div class="flex">
+                            <p-button label="Agregar" severity="success" icon="fa-solid fa-plus"
+                                (onClick)="onCreateCilindro()" [raised]="true"></p-button>
+                            <span class="p-input-icon-left ml-auto">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text" [(ngModel)]="searchCilindro" (input)="onGlobalFilter(dtData
+                            , $event)" placeholder="Filtrar..." />
+                            </span>
+                        </div>
+                    </ng-template>
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th pSortableColumn="IdCilindro">
+                                Id<p-sortIcon field="IdCilindro" />
+                            </th>
+                            <th pSortableColumn="DescripcionCilindro">
+                                Descripción<p-sortIcon field="DescripcionCilindro" />
+                            </th>
+                            <th pSortableColumn="AnchoCilindroMm">
+                                Ancho (mm) <p-sortIcon field="AnchoCilindroMm" /></th>
+                            <th pSortableColumn="DesarrolloCilindroMm">
+                                Desarrollo (mm)<p-sortIcon field="DesarrolloCilindroMm" />
+                            </th>
+                            <th pSortableColumn="DescripcionTipoCilindro">
+                                Tipo<p-sortIcon field="DescripcionTipoCilindro" />
+                            </th>
+                            <th pSortableColumn="CantidadDientes">
+                                Cantidad dientes<p-sortIcon field="CantidadDientes" />
+                            </th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-cilindro>
+                        <tr>
+                            <td>
+                                <p-button [label]="cilindro.IdCilindro" [link]="true"
+                                    (onClick)="onEditCilindro(cilindro)"></p-button>
+                            </td>
+                            <td>{{cilindro.DescripcionCilindro }}</td>
+                            <td>{{cilindro.AnchoCilindroMm}}</td>
+                            <td>{{cilindro.DesarrolloCilindroMm}}</td>
+                            <td>{{cilindro.DescripcionTipoCilindro}}</td>
+                            <td>{{cilindro.CantidadDientes}}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabPanel>
+            <p-tabPanel header="Catalogos">
+                <div class="grid">
+                    <p-fieldset legend="Tipos" class="col-12 md:col-6">
+                        <p-table [value]="listTipoCilindro" [loading]="loadingTipoCilindro" styleClass="p-datatable-sm">
+                            <ng-template pTemplate="caption">
+                                <p-button label="Agregar" severity="success" icon="fa-solid fa-plus"
+                                    (onClick)="onCreateTipoCilindro()" [raised]="true"></p-button>
+                            </ng-template>
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Descripción</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-tipoCilindro>
+                                <tr>
+                                    <td>
+                                        <p-button [label]="tipoCilindro.IdTipoCilindro" [link]="true"
+                                            (onClick)="onEditTipoCilindro(tipoCilindro)"
+                                            pTooltip="Editar información"></p-button>
+                                    </td>
+                                    <td>{{tipoCilindro.DescripcionTipoCilindro }}</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-fieldset>
+                    <p-fieldset legend="Categorias" class="col-12 md:col-6">
+                        <p-table [value]="listCategoriaCilindro" [loading]="loadingCategoriaCilindro"
+                            styleClass="p-datatable-sm">
+                            <ng-template pTemplate="caption">
+                                <p-button label="Agregar" severity="success" icon="fa-solid fa-plus"
+                                    (onClick)="onCreateCategoriaCilindro()" [raised]="true"></p-button>
+                            </ng-template>
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Cantidad de dientes</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-cateCilindro>
+                                <tr>
+                                    <td>
+                                        <p-button [label]="cateCilindro.IdCategoriaCilindro" [link]="true"
+                                            (onClick)="onEditCategoriaCilindro(cateCilindro)"
+                                            pTooltip="Editar información"></p-button>
+                                    </td>
+                                    <td>{{cateCilindro.CantidadDientes }}</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-fieldset>
+                </div>
+            </p-tabPanel>
+        </p-tabView>
+    </div>
+</p-card>
+<!--MODAL CREACION TIPO CILINDRO-->
+<p-dialog [header]="idTipoCilindro === 0 ? 'Crear tipo de cilindro':'Editar tipo de cilindro'" [modal]="true"
+    [(visible)]="modalTipoCilindro" [style]="{ width: '40rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-3" [formGroup]="myFormTipoCilindro" (ngSubmit)="onSaveTipoCilindro()">
+            <div class="flex align-items-center gap-3">
+                <label for="descripcion" class="font-semibold w-7rem">Descripcion</label>
+                <input pInputText id="descripcion" class="flex-auto" autocomplete="off" formControlName="descripcion" />
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalTipoCilindro = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL CREACION DIENTES CILINDRO-->
+<p-dialog [header]="idCategoriaCilindro === 0 ? 'Crear categoria de cilindro':'Editar categoria de cilindro'"
+    [modal]="true" [(visible)]="modalCategoriaCilindro" [style]="{ width: '30rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-3" [formGroup]="myFormCategoriaCilindro"
+            (ngSubmit)="onSaveCategoriaCilindro()">
+            <div class="flex align-items-center gap-3">
+                <label for="cantidad" class="font-semibold w-8rem">Cantidad de dientes</label>
+                <p-inputNumber formControlName="cantidad" id="cantidad" [minFractionDigits]="0" mode="decimal"
+                    locale="es-EC" [min]="0" />
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalCategoriaCilindro = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL CREACION CILINDRO-->
+<p-dialog [header]="idCilindro === 0 ? 'Crear cilindro':'Editar cilindro'" [modal]="true"
+    [(visible)]="modalCreateCilindro" [style]="{ width: '40rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-3" [formGroup]="myFormCilindro" (ngSubmit)="onSaveCilindro()">
+            <div class="flex align-items-center gap-3">
+                <label for="tipo" class="font-semibold w-7rem">Tipo cilindro</label>
+                <div class="flex-auto">
+                    <p-dropdown formControlName="tipo" id="tipo" [options]="listTipoCilindro"
+                        placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                        [filterFields]="['DescripcionTipoCilindro']" [showClear]="true" [loading]="loadingTipoCilindro"
+                        optionValue="IdTipoCilindro" filterPlaceholder="Buscando...">
+                        <ng-template let-cilindro pTemplate="selectedItem">
+                            <div class="custom-dropdown-item-selected">
+                                {{ cilindro.IdTipoCilindro }} - {{cilindro.DescripcionTipoCilindro}}
+                            </div>
+                        </ng-template>
+                        <ng-template let-cilindro pTemplate="item">
+                            <div class="custom-dropdown-item">
+                                {{ cilindro.IdTipoCilindro }} - {{cilindro.DescripcionTipoCilindro}}
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="categoria" class="font-semibold w-7rem">Categoria cilindro</label>
+                <div class="flex-auto">
+                    <p-dropdown formControlName="categoria" id="categoria" [options]="listCategoriaCilindro"
+                        placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                        [filterFields]="['CantidadDientes']" [showClear]="true" [loading]="loadingCategoriaCilindro"
+                        filterPlaceholder="Buscando..." (ngModelChange)="onCalcularDesarrollo($event)"
+                        optionValue="IdCategoriaCilindro">
+                        <ng-template let-cilindro pTemplate="selectedItem">
+                            <div class="custom-dropdown-item-selected">
+                                {{ cilindro.IdCategoriaCilindro }} - {{cilindro.CantidadDientes}}
+                            </div>
+                        </ng-template>
+                        <ng-template let-cilindro pTemplate="item">
+                            <div class="custom-dropdown-item">
+                                {{ cilindro.IdCategoriaCilindro }} - {{cilindro.CantidadDientes}} (mm)
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label class="font-semibold w-7rem">Desarrollo (mm)</label>
+                <b class="font-semibold flex-auto text-xl">{{desarrollo}}</b>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="descripcion" class="font-semibold w-7rem">Descripcion</label>
+                <input pInputText id="descripcion" class="flex-auto" autocomplete="off" formControlName="descripcion" />
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="ancho" class="font-semibold w-7rem">Ancho (mm)</label>
+                <p-inputNumber formControlName="ancho" id="ancho" [minFractionDigits]="0" mode="decimal" locale="es-EC"
+                    [min]="0" />
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalCreateCilindro = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>

@@ -1,0 +1,191 @@
+<div class="grid" *ngIf="cierreService.infoJSON && cierreService.infoOP && cierreService.infoProdTerm">
+    <p-fieldset legend="Cabecera" class="col-12 md:col-6">
+        <div class="flex flex-column gap-3">
+            <div class="flex flex-column">
+                <label>Código final producto</label>
+                <b class="font-bold flex-auto text-2xl">
+                    {{ cierreService.infoProdTerm.CodigoFinalProductoTerminado }}
+                </b>
+            </div>
+            <div class="flex flex-column">
+                <label>Nombre producto</label>
+                <b class="font-bold flex-auto text-2xl">{{ cierreService.infoProdTerm.NombreProductoEtimet }}</b>
+            </div>
+            <div class="flex justify-content-between gap-2">
+                <div class="flex flex-column">
+                    <label>Aplica IVA</label>
+                    <b class="font-bold flex-auto text-2xl">{{ cierreService.infoJSON.AplicaIva }}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label>Fecha inicio</label>
+                    <b class="font-bold flex-auto text-2xl">{{ cierreService.infoJSON.OpFechaInicio | date }}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label>Fecha terminado</label>
+                    <b class="font-bold flex-auto text-2xl">{{ cierreService.infoJSON.OpFechaTerminado | date }}</b>
+                </div>
+            </div>
+            <div class="flex justify-content-between gap-2">
+                <div class="flex flex-column">
+                    <label>Cantidad solicitada</label>
+                    <b class="font-bold flex-auto text-2xl">{{ cierreService.infoJSON.OpCantidadSolicitada }}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label>Cantidad producida</label>
+                    <b class="font-bold flex-auto text-2xl">{{ cierreService.infoJSON.OpCantidadProducida }}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label>Cantidad desperdicio</label>
+                    <b class="font-bold flex-auto text-2xl">{{ cierreService.infoJSON.OpCantidadDesperdicio }}</b>
+                </div>
+            </div>
+            <div class="flex justify-content-between gap-2">
+                <div class="flex flex-column">
+                    <label>Unidad de medida</label>
+                    <b class="font-bold flex-auto text-2xl">{{ cierreService.infoJSON.UnidadMedida }}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label>Número de horas</label>
+                    <b class="font-bold flex-auto text-2xl">{{ cierreService.infoJSON.OpNumeroHoras }}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label>Número de empleados</label>
+                    <b class="font-bold flex-auto text-2xl">{{ cierreService.infoJSON.OpNumeroEmpleados }}</b>
+                </div>
+            </div>
+            <div class="flex flex-column">
+                <label>Observaciones</label>
+                <b class="font-bold flex-auto text-2xl">{{ cierreService.infoJSON.OpObservaciones }}</b>
+            </div>
+            <div class="flex justify-content-center gap-2">
+                <p-button label="Editar" icon="fa-solid fa-pencil" [raised]="true" severity="info"
+                    (onClick)="onOpenEditarEnvio()"></p-button>
+            </div>
+        </div>
+    </p-fieldset>
+    <p-fieldset legend="Detalles" class="col-12 md:col-6">
+        <p-table [value]="cierreService.listMpEnvio" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th class="text-center">Acción</th>
+                    <th class="text-center">Código</th>
+                    <th class="text-center">Liberado (m2)</th>
+                    <th class="text-center">Producido (m2)</th>
+                    <th class="text-center">Desperdicio (m2)</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+                <tr>
+                    <td>
+                        <p-button icon="fa-solid fa-pencil" severity="info" [raised]="true" pTooltip="Editar"
+                            tooltipPosition="bottom" (onClick)="onOpenMpEnvio(item)"></p-button>
+                    </td>
+                    <td>{{item.CodigoInterno}}</td>
+                    <td class="text-right">{{item.Liberado | number : '0.2-2'}}</td>
+                    <td class="text-right">{{item.Producido | number : '0.2-2'}}</td>
+                    <td class="text-right">{{item.Desperdicio | number : '0.2-2'}}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-fieldset>
+    <div class="col-12 flex justify-content-center gap-5">
+        <p-button label="Enviar Parcial" icon="fa-solid fa-circle-half-stroke" severity="info" [raised]="true"
+            [disabled]="cierreService.blockedSend" (onClick)="onEnviarParcial()"></p-button>
+        <p-button label="Enviar Total" icon="fa-solid fa-circle" severity="success" [raised]="true"
+            (onClick)="onEnviarTotal()"></p-button>
+    </div>
+</div>
+<!--MODAL EDITAR ENVIO-->
+<p-dialog [(visible)]="modalEditarEnvio" [modal]="true" [style]="{ width: '40rem' }" header="Editar Envio"
+    [maximizable]="true">
+    <form class="grid mt-2" [formGroup]="myFormEditar">
+        <div class="col-6">
+            <div class="flex flex-column gap-3">
+                <div class="flex flex-column">
+                    <label class="font-semibold">Fecha inicio</label>
+                    <p-calendar formControlName="fechaInicio" dateFormat="dd-mm-yy" />
+                </div>
+                <div class="flex flex-column">
+                    <label class="font-semibold">Fecha fin</label>
+                    <p-calendar formControlName="fechaFin" dateFormat="dd-mm-yy" />
+                </div>
+                <div class="flex flex-column gap-3">
+                    <label class="font-semibold">Aplica Iva</label>
+                    <div class="flex flex-wrap gap-3 align-items-center">
+                        <div class=" flex align-items-center">
+                            <p-radioButton value="SI" inputId="radiobtn1" formControlName="aplicaIva" />
+                            <label for="radiobtn1" class="ml-2">Si</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <p-radioButton value="NO" inputId="radiobtn2" formControlName="aplicaIva" />
+                            <label for="radiobtn2" class="ml-2">No</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-column">
+                    <label for="unidadMedida" class="font-semibold">Unidad de medida</label>
+                    <p-dropdown formControlName="unidadMedida" id="unidadMedida" [options]="listUnidadMedida"
+                        placeholder="Escoja una opcion">
+                    </p-dropdown>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="flex flex-column gap-3">
+                <div class="flex flex-column">
+                    <label for="cilindro" class="font-semibold">Cantidad solicitada</label>
+                    <p-inputNumber formControlName="cantidadSolicitada" [minFractionDigits]="2" locale="en-US"
+                        [min]="0" />
+                </div>
+                <div class="flex flex-column">
+                    <label for="cilindro" class="font-semibold">Cantidad producida</label>
+                    <p-inputNumber formControlName="cantidadProducida" [minFractionDigits]="2" locale="en-US"
+                        [min]="0" />
+                </div>
+                <div class="flex flex-column">
+                    <label for="cilindro" class="font-semibold">Número horas</label>
+                    <p-inputNumber formControlName="numeroHoras" [minFractionDigits]="0" locale="en-US" [min]="0" />
+                </div>
+                <div class="flex flex-column">
+                    <label for="cilindro" class="font-semibold">Número empleados</label>
+                    <p-inputNumber formControlName="numeroEmpleados" [minFractionDigits]="0" locale="en-US" [min]="0" />
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="flex flex-column gap-3">
+                <div class="flex flex-column">
+                    <label for="sustrato" class="font-semibold">Observación</label>
+                    <div class="flex-auto">
+                        <textarea styleClass="w-full" rows="5" pInputTextarea formControlName="observacion"
+                            maxlength="300"></textarea>
+                    </div>
+                </div>
+                <div class="flex">
+                    <p-button label="Guardar" icon="fa-solid fa-floppy-disk" [raised]="true" severity="success"
+                        (onClick)="onSaveEditarEnvio()"></p-button>
+                </div>
+            </div>
+        </div>
+    </form>
+</p-dialog>
+<!--MODAL MP ENVIO-->
+<p-dialog [(visible)]="modalMp" [modal]="true" [style]="{ width: '20rem' }" header="Editar Materia Prima"
+    [maximizable]="true">
+    <form class="mt-2 flex justify-content-center" [formGroup]="myFormMp">
+        <div class="flex flex-column gap-3">
+            <div class="flex flex-column">
+                <label for="producido" class="font-semibold">Cantidad producida (m2)</label>
+                <p-inputNumber formControlName="producido" [minFractionDigits]="2" locale="en-US" [min]="0" />
+            </div>
+            <div class="flex flex-column">
+                <label for="desperdicio" class="font-semibold">Cantidad desperdicio (m2)</label>
+                <p-inputNumber formControlName="desperdicio" [minFractionDigits]="2" locale="en-US" [min]="0" />
+            </div>
+            <div class="flex justify-content-center gap-3">
+                <p-button label="Guardar" icon="fa-solid fa-floppy-disk" [raised]="true" severity="success"
+                    (onClick)="onSaveEditarMp()"></p-button>
+            </div>
+        </div>
+    </form>
+</p-dialog>

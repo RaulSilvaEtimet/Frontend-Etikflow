@@ -1,0 +1,67 @@
+<div class="flex flex-column gap-3">
+    <p-fieldset legend="Consolidado">
+        <p-table [value]="cierreService.listMpUtilizada" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header" let-columns>
+                <tr>
+                    <th class="text-center">#</th>
+                    <th class="text-center">Tipo inventario</th>
+                    <th class="text-center">Codigo</th>
+                    <th class="text-center">Ancho (mm)</th>
+                    <th class="text-center">Liberado (m)</th>
+                    <th class="text-center">Liberado (m2)</th>
+                    <th class="text-center">Devuelto (m)</th>
+                    <th class="text-center">Devuelto (m2)</th>
+                    <th class="text-center">Total (m2)</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+                <tr>
+                    <td class="text-center">
+                        {{rowIndex + 1}}
+                    </td>
+                    <td>{{item.Nombre}}</td>
+                    <td>{{item.CodigoInterno}}</td>
+                    <td class="text-right">{{item.ALiberado | number: '0.0-0'}}</td>
+                    <td class="text-right">{{item.MLiberado | number: '0.2-2'}}</td>
+                    <td class="text-right">{{item.M2Liberado| number: '0.2-2'}}</td>
+                    <td class="text-right">{{item.MDevuelto | number: '0.2-2'}}</td>
+                    <td class="text-right">{{item.M2Devuelto| number: '0.2-2'}}</td>
+                    <td class="text-right">{{item.M2Total| number: '0.2-2'}}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-fieldset>
+    <p-fieldset legend="Detallado">
+        <p-table [value]="cierreService.listMPLiberado" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header" let-columns>
+                <tr>
+                    <th class="text-center">#</th>
+                    <th class="text-center">Codigo Barras</th>
+                    <th class="text-center">Ancho (mm)</th>
+                    <th class="text-center">Largo (m)</th>
+                    <th class="text-center">Area (m2)</th>
+                    <th class="text-center">Tipo</th>
+                    <th class="text-center">Fecha</th>
+                    <th class="text-center">Usuario</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+                <tr>
+                    <td class="text-center">
+                        {{rowIndex + 1}}
+                    </td>
+                    <td>{{item.CodigoBarras}}</td>
+                    <td class="text-right">{{item.Ancho | number: '0.0-0'}}</td>
+                    <td class="text-right">{{item.Largo | number: '0.2-2'}}</td>
+                    <td class="text-right">{{item.TotalM2 | number: '0.2-2'}}</td>
+                    <td>
+                        <p-tag severity="info" value="Liberado" *ngIf="item.TipoRegistro === 1"></p-tag>
+                        <p-tag severity="secondary" value="Devuelto" *ngIf="item.TipoRegistro === 2"></p-tag>
+                    </td>
+                    <td>{{item.FechaRegistro | date: 'dd MMMM YYYY'}}</td>
+                    <td>{{item.Usuario}}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-fieldset>
+</div>

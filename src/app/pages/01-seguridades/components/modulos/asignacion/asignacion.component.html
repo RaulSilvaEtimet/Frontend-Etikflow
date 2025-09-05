@@ -1,0 +1,21 @@
+<p-card header="Listado de Asignaciones">
+    <div class="grid">
+        <div class="col-12 md:col-4">
+            <p-fieldset legend="Roles">
+                <p-dropdown [options]="listRoles" [(ngModel)]="selectedRol" optionLabel="RoleName" styleClass="w-full"
+                    [showClear]="true" placeholder="Selecciona un Rol" (ngModelChange)="onChangeSelectedRol($event)" />
+            </p-fieldset>
+        </div>
+        <div class="col-12 md:col-8">
+            <p-fieldset legend="Permisos">
+                <p-tree [value]="dataTree" class="w-full md:w-30rem" selectionMode="checkbox"
+                    [(selection)]="selectedAsignacion" (onNodeSelect)="onSelectedNode($event.node)"
+                    (onNodeUnselect)="onUnselectedNode($event.node)" checkStrict="true">
+                    <ng-template let-node pTemplate="default">
+                        <b>{{ node.label }}</b>
+                    </ng-template>
+                </p-tree>
+            </p-fieldset>
+        </div>
+    </div>
+</p-card>

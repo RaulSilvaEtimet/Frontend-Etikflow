@@ -1,0 +1,321 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Listado de ordenes de producción">
+    <p-table #dtData [value]="listOP" [loading]="loadingOP" [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['SecuencialOrdenProduccion','FechaRegistro','NombreTrabajo','RazonSocialCliente','SecuencialCotizacion','DescripcionEstado']"
+        [responsive]="true" [scrollable]="true" scrollDirection="horizontal" [paginator]="true"
+        [rowsPerPageOptions]="[10, 20, 50, 100]">
+        <ng-template pTemplate="caption">
+            <div class="flex gap-2">
+                <div class="flex">
+                    <p-button label="Sincronizar" icon="fa-solid fa-rotate" [raised]="true" severity="primary"
+                        (onClick)="ngOnInit()"></p-button>
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData, $event)"
+                        placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th style="width: 120px;" pSortableColumn="SecuencialOrdenProduccion">
+                    OP <p-sortIcon field="SecuencialOrdenProduccion" />
+                </th>
+                <th pSortableColumn="FechaRegistro">
+                    Fecha registro <p-sortIcon field="FechaRegistro" />
+                </th>
+                <th pSortableColumn="NombreTrabajo">
+                    Producto <p-sortIcon field="NombreTrabajo" />
+                </th>
+                <th pSortableColumn="RazonSocialCliente">
+                    Cliente <p-sortIcon field="RazonSocialCliente" />
+                </th>
+                <th style="width: 120px;" pSortableColumn="SecuencialCotizacion">
+                    # Cotización <p-sortIcon field="SecuencialCotizacion" />
+                </th>
+                <th pSortableColumn="DescripcionEstado">
+                    Estado <p-sortIcon field="DescripcionEstado" />
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    <p-columnFilter type="text" field="SecuencialOrdenProduccion" matchMode="equals"
+                        [showMenu]="false" />
+                </th>
+                <th></th>
+                <th>
+                    <p-columnFilter type="text" field="NombreTrabajo" matchMode="contains" [showMenu]="false" />
+                </th>
+                <th>
+                    <p-columnFilter type="text" field="RazonSocialCliente" matchMode="contains" [showMenu]="false" />
+                </th>
+                <th>
+                    <p-columnFilter type="text" field="SecuencialCotizacion" matchMode="equals" [showMenu]=" false" />
+                </th>
+                <th></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item let-ri="rowIndex">
+            <tr>
+                <td class="flex gap-2 justify-content-center">
+                    <p-button [link]="true" pTooltip="Visualizar" tooltipPosition="bottom"
+                        [label]="item.SecuencialOrdenProduccion" (onClick)="onGetInfoAllOP(item)"></p-button>
+                </td>
+                <td>{{item.FechaRegistro | date : 'dd-MMMM-yyyy HH:mm'}}</td>
+                <td>{{item.NombreTrabajo }}</td>
+                <td>{{item.RazonSocialCliente}}</td>
+                <td>{{item.SecuencialCotizacion}}</td>
+                <td>
+                    <p-tag [value]="item.DescripcionEstado" severity="secondary"
+                        *ngIf="item.IdEstadoOrdenProduccion === 1"></p-tag>
+                    <p-tag [value]="item.DescripcionEstado" severity="info"
+                        *ngIf="item.IdEstadoOrdenProduccion === 2 || item.IdEstadoOrdenProduccion === 3 || item.IdEstadoOrdenProduccion === 4 || item.IdEstadoOrdenProduccion === 5"></p-tag>
+                    <p-tag [value]="item.DescripcionEstado" severity="success"
+                        *ngIf="item.IdEstadoOrdenProduccion === 6"></p-tag>
+                    <p-tag [value]="item.DescripcionEstado" severity="warning"
+                        *ngIf="item.IdEstadoOrdenProduccion === 7"></p-tag>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL VER ORDEN PRODUCCION-->
+<p-dialog header="Orden de Producción" [(visible)]="modalInfoAllOP" [modal]="true" [style]="{ width: '70rem' }">
+    <p-tabView *ngIf="infoOP !== undefined && infoProdTerm !== undefined">
+        <p-tabPanel header="Información">
+            <div class="flex flex-column gap-3">
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Orden de Producción</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoOP.SecuencialOrdenProduccion}}</b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Código antiguo</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoProdTerm.CodigoAntiguo}}</b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Código de producto terminado</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoOP.CodigoTrabajo}}</b>
+                    </div>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Unidad de trabajo</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoProdTerm.UnidadMedida}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Nombre del producto</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoOP.NombreTrabajo}}</b>
+                </div>
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Avance (cm o m)</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoProdTerm.AvanceEtiqueta | number: '0.0-2'}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Ancho (cm)</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoProdTerm.AnchoEtiqueta | number: '0.0-2'}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Nucleo</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoProdTerm.Cono}}</b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Unidades por rollo</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoProdTerm.UnidadesPorRollo | number : '0.0-0'}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Filas</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoProdTerm.FilasPorRollo | number: '0.0-0'}}
+                        </b>
+                    </div>
+                </div>
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Tipo de corte</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoProdTerm.TipoCorte}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Rebobinado</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoProdTerm.Rebobinado}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Cantidad a fabricas</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoOP.Cantidad | number: '0.0-0'}}
+                        </b>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="flex flex-column">
+                        <label class="">Metros Lineales</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoOP.MetrosLinealesVariable | number: '0.0-2'}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Metros Cuadrados</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoOP.Metros2Fijos | number: '0.0-2' }}
+                        </b>
+                    </div>
+                </div>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Acciones">
+            <div class="flex flex-column gap-3">
+                <div class="flex gap-3">
+                    <p-button label="Entrega MP" icon="fa-solid fa-right-long" severity="success" [raised]="true"
+                        (onClick)="onChangeEstado(2)" *ngIf="infoOP.IdEstadoOrdenProduccion === 1"></p-button>
+                </div>
+                <div class="flex gap-3">
+                    <p-button label="Imprimir" icon="fa-solid fa-print" severity="info" [raised]="true"
+                        (onClick)="onPrintOP()"></p-button>
+                    <p-button label="Ver bitacora" icon="fa-solid fa-file-signature" severity="info" [raised]="true"
+                        (onClick)="onGetBitacora()"></p-button>
+                    <p-button label="Agregar observación" icon="fa-solid fa-comments" severity="warning" [raised]="true"
+                        (onClick)="onOpenObservacion()"></p-button>
+                </div>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Materia Prima">
+            <div class="flex flex-column gap-2">
+                <p-fieldset legend="Consolidado">
+                    <p-table [value]="listMPFinal" styleClass="p-datatable-sm">
+                        <ng-template pTemplate="header" let-columns>
+                            <tr>
+                                <th>Codigo Interno</th>
+                                <th>Materia Prima</th>
+                                <th class="text-center">Liberado (m2)</th>
+                                <th class="text-center">Devuelto (m2)</th>
+                                <th class="text-center">Producido (m2)</th>
+                                <th class="text-center">Desperdicio (m2)</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+                            <tr>
+                                <td>{{item.CodigoInterno}}</td>
+                                <td>{{item.MateriaPrima}}</td>
+                                <td class="text-right">{{item.Liberado | number: '0.0-2'}}</td>
+                                <td class="text-right">{{item.Devuelto | number: '0.0-2'}}</td>
+                                <td class="text-right">{{item.Producido | number: '0.0-2'}}</td>
+                                <td class="text-right">{{item.Desperdicio | number: '0.0-2'}}</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </p-fieldset>
+                <p-fieldset legend="Detallado">
+                    <p-table [value]="listMPLiberada" styleClass="p-datatable-sm">
+                        <ng-template pTemplate="header" let-columns>
+                            <tr>
+                                <th>Id</th>
+                                <th>Codigo Barras</th>
+                                <th>Ancho (mm)</th>
+                                <th>Largo (m)</th>
+                                <th>Area (m2)</th>
+                                <th>Tipo</th>
+                                <th>Padre</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+                            <tr>
+                                <td class="text-center">
+                                    {{rowIndex + 1}}
+                                </td>
+                                <td>{{item.CodigoBarras}}</td>
+                                <td class="text-right">{{item.Ancho| number: '0.0-2'}}</td>
+                                <td class="text-right">{{item.Largo| number: '0.0-2'}}</td>
+                                <td class="text-right">{{item.TotalM2| number: '0.0-2'}}</td>
+                                <td>
+                                    <p-tag severity="info" value="Liberado" *ngIf="item.TipoRegistro === 1"></p-tag>
+                                    <p-tag severity="secondary" value="Devuelto"
+                                        *ngIf="item.TipoRegistro === 2"></p-tag>
+                                    <p-tag severity="success" value="Producido" *ngIf="item.TipoRegistro === 3"></p-tag>
+                                    <p-tag severity="warning" value="Desperdicio"
+                                        *ngIf="item.TipoRegistro === 4"></p-tag>
+                                </td>
+                                <td>
+                                    {{onGetPosPadreKardex(item)}}
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </p-fieldset>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Valores operarios">
+            <div class="flex flex-column gap-2">
+                <p-table [value]="listValoresProduccion" styleClass="p-datatable-sm">
+                    <ng-template pTemplate="header" let-columns>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Material</th>
+                            <th>Maquina</th>
+                            <th style="width: 10%">Calibracion (m)</th>
+                            <th style="width: 10%">Metros producidos (m)</th>
+                            <th style="width: 10%">Ancho utilizados (mm)</th>
+                            <th style="width: 10%">Cantidad producida</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item>
+                        <tr>
+                            <td>{{item.NombreColaborador}}</td>
+                            <td>{{item.CodigoMaterial}}</td>
+                            <td>{{item.Maquina}}</td>
+                            <td class="text-right">{{item.ValorMetrosCalibracion}}</td>
+                            <td class="text-right">{{item.MetroLineal}}</td>
+                            <td class="text-right">{{item.Ancho}}</td>
+                            <td class="text-right">{{item.CantidadProduccion}}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </p-tabPanel>
+    </p-tabView>
+</p-dialog>
+<!--MODAL INFO BITACORA-->
+<p-sidebar [(visible)]="modalInfoBitacora" position="right" [blockScroll]="true" [modal]="true" styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>BITACORA</h5>
+    </ng-template>
+    <div class="flex">
+        <ul class="list-disc">
+            <li class="flex flex-column mt-4" *ngFor="let item of listBitacora">
+                <b>{{item.FechaRegistro | date : 'dd-MMMM-yyyy HH:mm'}}</b>
+                <b>{{item.DescripcionEstado }}</b>
+                <b>{{item.Usuario}}</b>
+                <b>{{item.Observacion}}</b>
+            </li>
+        </ul>
+    </div>
+</p-sidebar>
+<!--MODAL ADD OBSERVACION-->
+<p-sidebar [(visible)]="modalAddObs" position="right" [blockScroll]="true" [modal]="true" styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>AGREGAR OBSERVACIONES</h5>
+    </ng-template>
+    <div class="flex flex-column gap-3 mt-2">
+        <form [formGroup]="myFormObs" class="flex flex-column gap-3" (ngSubmit)="onSaveObservacion()">
+            <div class="flex flex-column">
+                <label for="observacion" class="font-semibold">Código de barras</label>
+                <textarea rows="5" cols="30" pInputTextarea formControlName="observacion"></textarea>
+            </div>
+            <div class="flex justify-content-center">
+                <p-button type="submit" label="Guardar" icon="fa-solid fa-floppy-disk" [raised]="true"
+                    severity="success"></p-button>
+            </div>
+        </form>
+    </div>
+</p-sidebar>

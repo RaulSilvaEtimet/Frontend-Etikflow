@@ -1,0 +1,113 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Control de bitacoras en Producción">
+    <div class="flex justify-content-center">
+        <form [formGroup]="myFormOp" class="flex align-items-center gap-3" (ngSubmit)="onSearchOP()">
+            <label for="cilindro" class="font-semibold w-7rem">Número de OP</label>
+            <p-inputNumber formControlName="numOp" [minFractionDigits]="0" locale="en-US" [min]="0" />
+            <p-button type="submit" label="Buscar" icon="fa-solid fa-magnifying-glass" [raised]="true"
+                severity="primary"></p-button>
+        </form>
+    </div>
+    <hr>
+    <div class="grid" *ngIf="infoOP">
+        <p-fieldset legend="Registros de Bitacora" class="col-12 md:col-7">
+            <p-table [value]="listBitacora" [loading]="loadingBitacora" styleClass="p-datatable-sm">
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha</th>
+                        <th>Usuario</th>
+                        <th>Estado</th>
+                        <th>Maquina</th>
+                        <th>Observacion</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+                    <tr>
+                        <td class="text-center">
+                            {{rowIndex + 1}}
+                        </td>
+                        <td>{{item.FechaRegistro | date: 'dd-MM-yyyy hh:mm'}}</td>
+                        <td>{{item.Usuario}}</td>
+                        <td>{{item.DescripcionEstado}}</td>
+                        <td>{{item.NombreMaquina}}</td>
+                        <td>{{item.Observacion}}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-fieldset>
+        <div class="col-12 md:col-5">
+            <div class="flex flex-column gap-2">
+                <p-fieldset legend="Acciones de Bitacora">
+                    <div class="flex flex-column gap-2">
+                        <div class="flex gap-2">
+                            <p-button label="Inicio Setup" icon="fa-solid fa-circle-play" [raised]="true"
+                                severity="primary" (onClick)="onAddBitacora('Inicio Setup')" class="w-auto"></p-button>
+                            <p-button label="Fin Setup" icon="fa-solid fa-circle-play" [raised]="true"
+                                severity="primary" (onClick)="onAddBitacora('Fin Setup')"></p-button>
+                        </div>
+                        <div class="flex gap-2">
+                            <p-button label="Inicio Produccion" icon="fa-solid fa-circle-play" [raised]="true"
+                                severity="primary" (onClick)="onAddBitacora('Inicio Produccion')"></p-button>
+                            <p-button label="Fin Produccion" icon="fa-solid fa-circle-play" [raised]="true"
+                                severity="primary" (onClick)="onAddBitacora('Fin Produccion')"></p-button>
+                        </div>
+                        <div class="flex gap-2">
+                            <p-button label="Inicio Comida" icon="fa-solid fa-circle-play" [raised]="true"
+                                severity="primary" (onClick)="onAddBitacora('Inicio Comida')"></p-button>
+                            <p-button label="Fin Comida" icon="fa-solid fa-circle-play" [raised]="true"
+                                severity="primary" (onClick)="onAddBitacora('Fin Comida')"></p-button>
+                        </div>
+                        <div class="flex gap-2">
+                            <p-button label="Inicio parada no programada" icon="fa-solid fa-circle-play" [raised]="true"
+                                severity="primary" (onClick)="onAddBitacora('Inicio parada no programada')"></p-button>
+                            <p-button label="Fin parada no programada" icon="fa-solid fa-circle-play" [raised]="true"
+                                severity="primary" (onClick)="onAddBitacora('Fin parada no programada')"></p-button>
+                        </div>
+                        <div class="flex gap-2">
+                            <p-button label="Agregar observación" icon="fa-solid fa-comments" severity="warning"
+                                [raised]="true" (onClick)="onOpenObservacion()"></p-button>
+                        </div>
+                        <hr>
+                        <form [formGroup]="myFormMaquina">
+                            <div class="flex align-items-center gap-3">
+                                <label for="maquina" class="font-semibold w-6rem">Maquina</label>
+                                <div class="flex-auto">
+                                    <p-dropdown formControlName="maquina" id="maquina" [options]="listMaquina"
+                                        placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                        optionLabel="nombre">
+                                    </p-dropdown>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </p-fieldset>
+                <p-fieldset legend="Etiquetas de trazabilidad">
+                    <div class="flex gap-2 justify-content-center">
+                        <p-button label="Imprimir" icon="fa-solid fa-print" severity="primary"
+                            (onClick)="onPrintEtiTrazabilidad()"></p-button>
+                    </div>
+                </p-fieldset>
+            </div>
+        </div>
+    </div>
+</p-card>
+<!--MODAL ADD OBSERVACION-->
+<p-sidebar [(visible)]="modalAddObs" position="right" [blockScroll]="true" [modal]="true" styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>AGREGAR OBSERVACIONES</h5>
+    </ng-template>
+    <div class="flex flex-column gap-3 mt-2">
+        <form [formGroup]="myFormObs" class="flex flex-column gap-3" (ngSubmit)="onSaveObservacion()">
+            <div class="flex flex-column">
+                <label for="observacion" class="font-semibold">Observación</label>
+                <textarea rows="5" cols="30" pInputTextarea formControlName="observacion"></textarea>
+            </div>
+            <div class="flex justify-content-center">
+                <p-button type="submit" label="Guardar" icon="fa-solid fa-floppy-disk" [raised]="true"
+                    severity="success"></p-button>
+            </div>
+        </form>
+    </div>
+</p-sidebar>

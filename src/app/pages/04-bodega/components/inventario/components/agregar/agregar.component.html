@@ -1,0 +1,71 @@
+<p-card header="Agregar Inventario">
+    <div class="grid justify-content-center">
+        <form class="col-6 flex flex-column gap-3" [formGroup]="myForm" (ngSubmit)="onAddInventario()">
+            <div class="flex flex-column gap-1">
+                <label for="lineaInventario" class="font-semibold">Producto a ingresar</label>
+                <div class="flex-auto">
+                    <p-dropdown formControlName="productoInventario" id="productoInventario"
+                        [options]="listProductoInventario" placeholder="Escoja una opcion" styleClass="w-full"
+                        [filter]="true"
+                        [filterFields]="['CodigoInternoSustrato', 'RazonSocialProveedor','DescripcionSustrato']"
+                        [showClear]="true" [loading]="loadingProductosInventario" filterPlaceholder="Buscando..."
+                        [virtualScroll]="true" [virtualScrollItemSize]="20">
+                        <ng-template let-item pTemplate="selectedItem">
+                            <div class="custom-dropdown-item-selected">
+                                <div>{{ item.CodigoInternoSustrato }} - {{ item.DescripcionSustrato }}</div>
+                            </div>
+                        </ng-template>
+                        <ng-template let-item pTemplate="item">
+                            <div class="custom-dropdown-item">
+                                <div> {{ item.CodigoInternoSustrato }} </div>
+                                <div> {{ item.RazonSocialProveedor }} </div>
+                                <div>{{ item.DescripcionSustrato }}</div>
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex flex-column gap-1">
+                <label for="ancho" class="font-semibold w-7rem">Ancho (mm)</label>
+                <p-inputNumber formControlName="ancho" [minFractionDigits]="0" mode="decimal" locale="en-US"
+                    currency="USD" [min]="0" />
+            </div>
+            <div class="flex flex-column gap-1">
+                <label for="largo" class="font-semibold w-7rem">Largo (m)</label>
+                <p-inputNumber formControlName="largo" id="ancho" [minFractionDigits]="2" mode="decimal" locale="en-US"
+                    currency="USD" [min]="0" />
+            </div>
+            <div class="flex flex-column gap-1">
+                <label for="largo" class="font-semibold w-7rem">Peso (kg)</label>
+                <p-inputNumber formControlName="peso" id="ancho" [minFractionDigits]="2" mode="decimal" locale="en-US"
+                    currency="USD" [min]="0" />
+            </div>
+            <div class="flex flex-column gap-3">
+                <label for="" class=" font-semibold w-12rem">Tipo</label>
+                <div class="flex flex-wrap gap-3 align-items-center">
+                    <div class=" flex align-items-center">
+                        <p-radioButton value="B" inputId="radiobtn1" formControlName="tipo" />
+                        <label for="radiobtn1" class="ml-2">Bobina</label>
+                    </div>
+                    <div class="flex align-items-center">
+                        <p-radioButton value="C" inputId="radiobtn2" formControlName="tipo" />
+                        <label for="radiobtn2" class="ml-2">Corte</label>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-column gap-1">
+                <label for="lote" class="font-semibold w-7rem">Lote</label>
+                <input pInputText id="lote" class="flex-auto" autocomplete="off" formControlName="lote" />
+            </div>
+            <div class="flex flex-column gap-1">
+                <label for="cantidad" class="font-semibold w-7rem">Cantidad</label>
+                <p-inputNumber formControlName="cantidad" id="cantidad" [minFractionDigits]="0" mode="decimal"
+                    locale="en-US" currency="USD" [min]="0" />
+            </div>
+            <div class="flex justify-content-center">
+                <p-button type="submit" icon="fa-solid fa-floppy-disk" label="Guardar" [raised]="true"
+                    severity="success"></p-button>
+            </div>
+        </form>
+    </div>
+</p-card>

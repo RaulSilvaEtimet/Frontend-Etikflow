@@ -1,0 +1,451 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSendData"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGetData"></app-blocked-get-info-database>
+<p-card header="Listado de maquinas">
+    <p-table #dtData [value]="listMaquinas" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingMaquinas"
+        [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['IdMaquina','Nombre','Modelo']">
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                <div class="flex gap-3">
+                    <p-button label="Agregar" severity="success" icon="fa-solid fa-plus" [raised]="true"
+                        (onClick)="onCreateMaquina()"></p-button>
+                    <p-button label="Sincronizar" icon="pi pi-sync" [loading]="loadingMaquinas" (onClick)="ngOnInit()"
+                        [raised]="true"></p-button>
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchLineaInventario" (input)="onGlobalFilter(dtData
+                        , $event)" placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="IdMaquina">Id<p-sortIcon field="IdMaquina" /></th>
+                <th>Acción</th>
+                <th pSortableColumn="Nombre">Nombre<p-sortIcon field="Nombre" />
+                </th>
+                <th pSortableColumn="Modelo">Modelo<p-sortIcon field="Modelo" /></th>
+                <th pSortableColumn="FechaAdquisicion">Fecha Adquisición<p-sortIcon field="FechaAdquisicion" /></th>
+                <th pSortableColumn="FechaFin">Fecha vida util<p-sortIcon field="FechaFin" /></th>
+                <th pSortableColumn="Estado">Estado<p-sortIcon field="Estado" /></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-maquina let-columns="columns" let-rowIndex="rowIndex">
+            <tr>
+                <td>{{maquina.IdMaquina}}</td>
+                <td>
+                    <p-button icon="fa-solid fa-eye" severity="success" [raised]="true"
+                        (onClick)="onGetInfoMaquina(maquina.IdMaquina)"></p-button>
+                </td>
+                <td>{{maquina.Nombre}}</td>
+                <td>{{maquina.Modelo}}</td>
+                <td>{{maquina.FechaAdquisicion | date: 'dd MMMM yyyy' }}</td>
+                <td>{{maquina.FechaFin | date: 'dd MMMM yyyy' }}</td>
+                <td>
+                    <p-tag *ngIf="maquina.Estado" value="Activado" severity="success" />
+                    <p-tag *ngIf="!maquina.Estado" value="Desactivado" severity="danger" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL VISUALIZAR-->
+<p-dialog header="Información de la maquina" [modal]="true" [(visible)]="modalInfoMaquina" [style]="{width: '75rem'}"
+    [maximizable]="true">
+    <div class="mt-2 flex flex-column gap-3">
+        <p-tabView>
+            <p-tabPanel header="Datos Iniciales">
+                <div class="flex flex-column gap-2">
+                    <p-button label="Editar" icon="fa-solid fa-pencil" severity="primary" [raised]="true"
+                        (onClick)="onEditMaquina()"></p-button>
+                    <div class="flex flex-wrap gap-2"
+                        *ngIf="infoMaquina.length !== 0 && infoMaquinaResumen.length !== 0">
+                        <p-fieldset legend="Información">
+                            <div class="flex flex-column gap-2">
+                                <div class="flex flex-column">
+                                    <label class="">Nombre</label>
+                                    <label class="font-bold text-3xl">{{infoMaquina[0].Nombre}}</label>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Modelo</label>
+                                    <b class="font-bold text-3xl">{{infoMaquina[0].Modelo}}</b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Adquisicion</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquina[0].FechaAdquisicion | date: 'dd MMMM yyyy'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Años Depreciacion</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquina[0].AniosDepreciacion | number : '1.0-4'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Fecha Fin</label>
+                                    <b class="font-bold text-3xl">{{infoMaquina[0].FechaFin | date: 'dd MMMM yyyy'}}</b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Horas Depreciacion</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquina[0].HorasDepreciacion | number : '1.0-4'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Estado</label>
+                                    <b class="font-bold text-3xl">{{infoMaquina[0].Estado}}</b>
+                                </div>
+                            </div>
+                        </p-fieldset>
+                        <p-fieldset legend="Valores">
+                            <div class="flex flex-column gap-2">
+                                <div class="flex flex-column">
+                                    <label class="">Potencia</label>
+                                    <b class="font-bold text-3xl">{{infoMaquina[0].Potencia | number : '1.0-4'}}</b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Velocidad Nominal</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquina[0].VelocidadNominal | number : '1.0-4'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Horas Uso Anual Estimado</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquina[0].HorasUsoAnualEstimado | number : '1.0-4'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">ValorDepreciacionHora</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquina[0].ValorDepreciacionHora | currency: 'USD': 'symbol':'0.2-4'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Porcentaje Mantenimiento</label>
+                                    <b class="font-bold text-3xl">
+                                        {{(infoMaquina[0].FactorPorcentajeMantenimiento) | number : '1.0-4'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Cargo Mantenimiento</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquina[0].CargoMantenimiento | currency: 'USD': 'symbol':'0.2-4'}}
+                                    </b>
+                                </div>
+                            </div>
+                        </p-fieldset>
+                        <p-fieldset legend="Costos">
+                            <div class="flex flex-column gap-2">
+                                <div class="flex flex-column">
+                                    <label class="">Costo</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquina[0].Costo | currency: 'USD': 'symbol':'0.2-4'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">PorcentajeInteres</label>
+                                    <b class="font-bold text-3xl">{{infoMaquina[0].PorcentajeInteres | number :
+                                        '1.0-4'}}</b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">ValorInversion</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquina[0].ValorInversion | currency: 'USD': 'symbol':'0.2-4'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">PorcentajeSeguro</label>
+                                    <b class="font-bold text-3xl">{{infoMaquina[0].PorcentajeSeguro | number :
+                                        '1.0-4'}}</b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">ValorSeguro</label>
+                                    <b class="font-bold text-3xl">{{infoMaquina[0].ValorSeguro | currency: 'USD':
+                                        'symbol':'0.2-4'}}</b>
+                                </div>
+                            </div>
+                        </p-fieldset>
+                        <p-fieldset legend="Resumen">
+                            <div class="flex flex-column gap-2">
+                                <div class="flex flex-column">
+                                    <label class="">Valor fijo</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquinaResumen[0].SubTotalCargosFijos | currency: 'USD':
+                                        'symbol':'0.2-4'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Valor consumo</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquinaResumen[0].SubTotalCargosConsumo| currency: 'USD':
+                                        'symbol':'0.2-4'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Valor operadores</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquinaResumen[0].SubTotalHoraOperarios| currency: 'USD':
+                                        'symbol':'0.2-4'}}
+                                    </b>
+                                </div>
+                                <div class="flex flex-column">
+                                    <label class="">Valor hora</label>
+                                    <b class="font-bold text-3xl">
+                                        {{infoMaquinaResumen[0].ValorHoraMaquina | currency: 'USD': 'symbol':'0.2-4'}}
+                                    </b>
+                                </div>
+                            </div>
+                        </p-fieldset>
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Gastos de funcionamiento">
+                <p-table [value]="infoMaquinaGasto" [tableStyle]="{'min-width': '50rem'}" styleClass="p-datatable-sm">
+                    <ng-template pTemplate="caption">
+                        <p-button label="Agregar" severity="success" icon="fa-solid fa-plus" [raised]="true"
+                            (onClick)="onCreateGasto()"></p-button>
+                    </ng-template>
+                    <ng-template pTemplate="header" let-columns>
+                        <tr>
+                            <th>Id</th>
+                            <th>Accion</th>
+                            <th>Descripción</th>
+                            <th>Valor unitario</th>
+                            <th>Medida</th>
+                            <th>Uso por hora</th>
+                            <th>Valor total</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-gasto let-ri="rowIndex">
+                        <tr>
+                            <td>{{gasto.IdGastosVariosMaquinas}}</td>
+                            <td>
+                                <p-button icon="fa-solid fa-pencil" severity="primary" [raised]="true"
+                                    (onClick)="onEditGasto(gasto)"></p-button>
+                            </td>
+                            <td>{{gasto.DescripcionGasto}}</td>
+                            <td>{{gasto.ValorUnitario | currency: 'USD': 'symbol':'0.2-4'}}</td>
+                            <td>{{gasto.DescripcionMedidaGasto}}</td>
+                            <td>{{gasto.CantidadUsoHora | number: '0.2-4'}}</td>
+                            <td>{{gasto.ValorUsoHora | currency: 'USD': 'symbol':'0.2-4'}}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabPanel>
+            <p-tabPanel header="Operadores">
+                <p-table [value]="infoMaquinaOperador" [tableStyle]="{'min-width': '50rem'}"
+                    styleClass="p-datatable-sm">
+                    <ng-template pTemplate="caption">
+                        <p-button label="Agregar" severity="success" icon="fa-solid fa-plus" [raised]="true"
+                            (onClick)="onCreateOperador()"></p-button>
+                    </ng-template>
+                    <ng-template pTemplate="header" let-columns>
+                        <tr>
+                            <th>#</th>
+                            <th>Acción</th>
+                            <th>Colaborador</th>
+                            <th>Estado</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-operador let-ri="rowIndex">
+                        <tr>
+                            <td>{{(ri+1)}}</td>
+                            <td>
+                                <p-button icon="fa-solid fa-pencil" [raised]="true"
+                                    (onClick)="onEditOperador(operador)"></p-button>
+                            </td>
+                            <td>{{operador.Colaborador}}</td>
+                            <td>
+                                <p-tag *ngIf="operador.Estado" value="Activado" severity="success" />
+                                <p-tag *ngIf="!operador.Estado" value="Desactivado" severity="danger" />
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabPanel>
+        </p-tabView>
+    </div>
+</p-dialog>
+<!--MODAL CREACION MAQUINA-->
+<p-dialog [header]="idMaquina === 0 ? 'Crear maquina' : 'Editar maquina'" [modal]="true"
+    [(visible)]="modalCreateMaquina" [modal]="true" [maximizable]="true" [style]="{ width: '40rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-2" [formGroup]="myFormMaquina" (ngSubmit)="onSaveMaquina()">
+            <p-fieldset legend="Información">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="nombre" class="font-semibold w-10rem">Nombre</label>
+                        <input pInputText class="flex-auto" autocomplete="off" formControlName="nombre" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="modelo" class="font-semibold w-10rem">Modelo</label>
+                        <input pInputText class="flex-auto" autocomplete="off" formControlName="modelo" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-10rem">Fecha adquisición</label>
+                        <div class="flex-auto">
+                            <p-calendar styleClass="w-full" formControlName="fechaAdquisicion" dateFormat="dd-mm-yy" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="aniosDepreciacion" class="font-semibold w-10rem">Años depreciación</label>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="aniosDepreciacion" id="aniosDepreciacion"
+                                [minFractionDigits]="0" mode="decimal" [min]="0" class="w-full" styleClass="w-full" />
+                        </div>
+                    </div>
+                </div>
+            </p-fieldset>
+            <p-fieldset legend="Valores">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="velocidadNominal" class="font-semibold w-10rem">Velocidad nominal (m/min)</label>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="velocidadNominal" id="velocidadNominal"
+                                [minFractionDigits]="0" mode="decimal" [min]="0" class="w-full" styleClass="w-full" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="horasUsoDiario" class="font-semibold w-10rem">Hora uso diario (h)</label>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="horasUsoDiario" id="horasUsoDiario" [minFractionDigits]="0"
+                                mode="decimal" [min]="0" [max]="24" class="w-full" styleClass="w-full" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="potencia" class="font-semibold w-10rem">Potencia ()</label>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="potencia" id="potencia" [minFractionDigits]="0"
+                                mode="decimal" [min]="0" class="w-full" styleClass="w-full" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="porcentajeMantenimiento" class="font-semibold w-10rem">Porcentaje de
+                            Mantenimiento</label>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="porcentajeMantenimiento" id="porcentajeMantenimiento"
+                                [minFractionDigits]="0" mode="decimal" [min]="0" class="w-full" styleClass="w-full" />
+                        </div>
+                    </div>
+                </div>
+            </p-fieldset>
+            <p-fieldset legend="Costos">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="costo" class="font-semibold w-10rem">Costos</label>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="costo" id="costo" [minFractionDigits]="0" mode="decimal"
+                                [min]="0" class="w-full" styleClass="w-full" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="porcentajeInteres" class="font-semibold w-10rem">Porcentaje interes</label>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="porcentajeInteres" id="porcentajeInteres"
+                                [minFractionDigits]="0" mode="decimal" [min]="0" class="w-full" styleClass="w-full" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="porcentajeSeguros" class="font-semibold w-10rem">Porcentaje seguro</label>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="porcentajeSeguros" id="porcentajeSeguros"
+                                [minFractionDigits]="0" mode="decimal" [min]="0" class="w-full" styleClass="w-full" />
+                        </div>
+                    </div>
+                </div>
+            </p-fieldset>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalCreateMaquina = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL ASIGNAR GASTO-->
+<p-dialog [header]="idGasto === 0 ? 'Editar gasto' : 'Asignar gasto'" [modal]="true" [(visible)]="modalCreateGasto"
+    [modal]="true" [maximizable]="true" [style]="{ width: '40rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-2" [formGroup]="myFormGasto" (ngSubmit)="onSaveGasto()">
+            <div class="flex align-items-center gap-3">
+                <label for="idGasto" class="font-semibold w-10rem">Gasto de funcionamiento</label>
+                <div class="flex-auto">
+                    <p-dropdown formControlName="idGasto" id="idGasto" [options]="listCargoConsumos"
+                        placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                        [filterFields]="['DescripcionGasto']" [showClear]="true" [loading]="loadingCargoConsumo"
+                        filterPlaceholder="Buscando..." [virtualScroll]="true" [virtualScrollItemSize]="20"
+                        optionValue="IdGastosVariosMaquinas">
+                        <ng-template let-gasto pTemplate="selectedItem">
+                            <div class="custom-dropdown-item-selected">
+                                {{gasto.DescripcionGasto}} ({{gasto.ValorUnitario | currency: 'USD': 'symbol':'0.2-4'}})
+                            </div>
+                        </ng-template>
+                        <ng-template let-gasto pTemplate="item">
+                            <div class="custom-dropdown-item">
+                                {{gasto.DescripcionGasto}} ({{gasto.ValorUnitario | currency: 'USD': 'symbol':'0.2-4'}})
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="cantidad" class="font-semibold w-10rem">Cantidad</label>
+                <div class="flex-auto">
+                    <p-inputNumber formControlName="cantidad" id="cantidad" [minFractionDigits]="4" mode="decimal"
+                        [min]="0" class="w-full" styleClass="w-full" />
+                </div>
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalCreateGasto = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL ASIGNAR OPERADOR-->
+<p-dialog [header]="idOperador === 0 ? 'Crear usuario':'Editar usuario'" [modal]="true"
+    [(visible)]="modalCreateOperador" [style]="{ width: '40rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-3" [formGroup]="myFormOperador" (ngSubmit)="onSaveOperador()">
+            <div class="flex align-items-center gap-3">
+                <label for="cargo" class="font-semibold w-10rem">Colaborador</label>
+                <div class="flex-auto">
+                    <p-dropdown [options]="listColaborador" formControlName="idColaborador" optionValue="IdColaborador"
+                        [filter]="true" [filterFields]="['NombreColaborador','ApellidoColaborador']" [showClear]="true"
+                        [virtualScroll]="true" [virtualScrollItemSize]="10" placeholder="Seleccionar colaborador"
+                        styleClass="w-full" [loading]="loadingColaborador">
+                        <ng-template let-operador pTemplate="selectedItem">
+                            <div class="custom-dropdown-item-selected">
+                                <div>{{ operador.NombreColaborador }} {{operador.ApellidoColaborador}}</div>
+                            </div>
+                        </ng-template>
+                        <ng-template let-operador pTemplate="item">
+                            <div class="flex align-items-center gap-2">
+                                <div>{{ operador.NombreColaborador }} {{operador.ApellidoColaborador}}</div>
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="estado" class="font-semibold w-10rem">Estado</label>
+                <div class="flex flex-wrap gap-3 align-items-center">
+                    <div class=" flex align-items-center">
+                        <p-radioButton [value]="true" inputId="radiobtn1" formControlName="estado" />
+                        <label for="radiobtn1" class="ml-2">Activado</label>
+                    </div>
+                    <div class="flex align-items-center">
+                        <p-radioButton [value]="false" inputId="radiobtn2" formControlName="estado" />
+                        <label for="radiobtn2" class="ml-2">Desactivado</label>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalCreateOperador = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>

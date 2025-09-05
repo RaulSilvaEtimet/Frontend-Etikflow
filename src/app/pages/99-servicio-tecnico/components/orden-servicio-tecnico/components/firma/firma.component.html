@@ -1,0 +1,16 @@
+<div class="flex flex-wrap gap-3">
+    <p-fieldset legend="Generador">
+        <div class="flex flex-column text-center">
+            <canvas id="canvasId" #canvasRef width="500" height="500"></canvas>
+            <p-button label="Limpiar" icon="pi pi-trash" [rounded]="true" severity="info"
+                (click)="onLimpiarFirma()"></p-button>
+            <p-button label="Capturar" icon="pi pi-camera" [rounded]="true" severity="success"
+                (click)="onCapturarFirma()"></p-button>
+        </div>
+    </p-fieldset>
+    <p-fieldset legend="Firma">
+        @if (stringImg != '') {
+        <img [src]="stringImg" alt="" srcset="" id="imgFirma">
+        }
+    </p-fieldset>
+</div>

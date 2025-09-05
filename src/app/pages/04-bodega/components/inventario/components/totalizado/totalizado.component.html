@@ -1,0 +1,162 @@
+<p-card header="Inventario totalizado">
+    <p-table #dtData [value]="listInventario" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingInventario"
+        [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['CodigoInternoInventario','Descripcion','TotalInventarioM2']" [responsive]="true"
+        [scrollable]="true" scrollDirection="horizontal" [rows]="10" [paginator]="true"
+        [rowsPerPageOptions]="[10, 20, 50, 100]">
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                <div class="flex gap-3">
+                    <p-button label="Sincronizar" severity="primary" (onClick)="onGetInventario()"
+                        [loading]="loadingInventario" icon="pi pi-sync"></p-button>
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData
+                , $event)" placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="CodigoInternoInventario">
+                    Código Interno <p-sortIcon field="CodigoInternoInventario" />
+                </th>
+                <th pSortableColumn="Descripcion">
+                    Descripcion <p-sortIcon field="Descripcion" />
+                </th>
+                <th pSortableColumn="TotalInventarioM2">
+                    Metros cuadrados <p-sortIcon field="TotalInventarioM2" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+            <tr>
+                <td class="flex gap-2 justify-content-center">
+                    <p-button [label]="item.CodigoInternoInventario" [link]="true" pTooltip="Visualizar"
+                        tooltipPosition="bottom" (onClick)="onOpenInfo(item)"></p-button>
+                </td>
+                <td>{{item.Descripcion}}</td>
+                <td class="text-right">{{item.TotalInventarioM2 | number: '0.2-2'}}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL DE VISUALIZACION-->
+<p-dialog header="Informacion detallada" [modal]="true" [(visible)]="modalInfoInventario" [style]="{ width: '70rem' }"
+    [scrollTop]="true" [maximizable]="true">
+    <div class="mt-2">
+        <div class="flex flex-column gap-3">
+            <p-fieldset legend="Total por proveedor">
+                <p-table [value]="listInfoInventario" [tableStyle]="{'min-width': '50rem'}"
+                    [loading]="loadingInfoInventario" styleClass="p-datatable-sm" [responsive]="true">
+                    <ng-template pTemplate="header" let-columns>
+                        <tr>
+                            <th style="min-width:20px">Id</th>
+                            <th>Descripcion</th>
+                            <th>Proveedor</th>
+                            <th>Metros cuadrados</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-totalizado let-columns="columns" let-ri="rowIndex">
+                        <tr>
+                            <td class="text-center">{{ri+1}}</td>
+                            <td>{{totalizado.DescripcionInventario}}</td>
+                            <td>{{totalizado.RazonSocialProveedor}}</td>
+                            <td class="text-right">{{totalizado.TotalInventarioM2 | number: '0.2-2'}}</td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="footer">
+                        <tr>
+                            <td colspan="3" style="text-align:right"><strong>Total:</strong></td>
+                            <td class="text-right">{{ getTotalM2() | number: '0.2-2' }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-fieldset>
+            <p-fieldset legend="Disponibles">
+                <p-table [value]="listDesglose" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingDesglose"
+                    styleClass="p-datatable-sm" [responsive]="true">
+                    <ng-template pTemplate="header" let-columns>
+                        <tr>
+                            <th>Proveedor</th>
+                            <th>Bobinas (m2)</th>
+                            <th>Cortes (m2)</th>
+                            <th>Total (m2)</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+                        <tr>
+                            <td>{{item.RazonSocialProveedor}}</td>
+                            <td class="text-right">{{item.BobinasM2 | number: '0.2-2'}}</td>
+                            <td class="text-right">{{item.CortesM2 | number: '0.2-2'}}</td>
+                            <td class="text-right">{{(item.CortesM2)+(item.BobinasM2) | number: '0.2-2'}}</td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="footer">
+                        <tr>
+                            <td colspan="3" style="text-align:right"><strong>Total:</strong></td>
+                            <td class="text-right">{{ getTotalM2Estado(1) | number: '0.2-2' }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-fieldset>
+            <p-fieldset legend="En cortes">
+                <p-table [value]="listDesglose" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingDesglose"
+                    styleClass="p-datatable-sm" [responsive]="true">
+                    <ng-template pTemplate="header" let-columns>
+                        <tr>
+                            <th>Proveedor</th>
+                            <th>Bobinas (m2)</th>
+                            <th>Cortes (m2)</th>
+                            <th>Total (m2)</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+                        <tr>
+                            <td>{{item.RazonSocialProveedor}}</td>
+                            <td class="text-right">{{item.BobinasEnCorteM2 | number: '0.2-2'}}</td>
+                            <td class="text-right">{{item.CortesEnCorteM2 | number: '0.2-2'}}</td>
+                            <td class="text-right">{{(item.CortesEnCorteM2)+(item.BobinasEnCorteM2) | number: '0.2-2'}}
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="footer">
+                        <tr>
+                            <td colspan="3" style="text-align:right"><strong>Total:</strong></td>
+                            <td class="text-right">{{ getTotalM2Estado(2) | number: '0.2-2' }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-fieldset>
+            <p-fieldset legend="En producción">
+                <p-table [value]="listDesglose" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingDesglose"
+                    styleClass="p-datatable-sm" [responsive]="true">
+                    <ng-template pTemplate="header" let-columns>
+                        <tr>
+                            <th>Proveedor</th>
+                            <th>Bobinas (m2)</th>
+                            <th>Cortes (m2)</th>
+                            <th>Total (m2)</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+                        <tr>
+                            <td>{{item.RazonSocialProveedor}}</td>
+                            <td class="text-right">{{item.BobinasEnProduccionM2 | number: '0.2-2'}}</td>
+                            <td class="text-right">{{item.CortesEnProduccionM2 | number: '0.2-2'}}</td>
+                            <td class="text-right">{{(item.CortesEnProduccionM2)+(item.BobinasEnProduccionM2) | number:
+                                '0.2-2'}}</td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="footer">
+                        <tr>
+                            <td colspan="3" style="text-align:right"><strong>Total:</strong></td>
+                            <td class="text-right">{{ getTotalM2Estado(3) | number: '0.2-2' }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-fieldset>
+        </div>
+    </div>
+</p-dialog>

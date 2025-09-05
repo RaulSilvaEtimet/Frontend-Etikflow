@@ -1,0 +1,56 @@
+<p-card header="Listado de tipo de inventario">
+    <p-table #dtData [value]="listTipoInventario" [tableStyle]="{'min-width': '50rem'}"
+        [loading]="loadingTipoInventario" [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['IdTipoInventario','CodigoTipoInventario','NombreTipoInventario','DescripcionLineaInventario ','NombreGrupo']"
+        [rowsPerPageOptions]="[10, 20, 50, 100]">
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                <div class="flex gap-3">
+                    <p-button label="Sincronizar" icon="pi pi-sync" [loading]="loadingTipoInventario"
+                        (onClick)="onGetTipoInventario()" />
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchTipoInventario" (input)="onGlobalFilter(dtData
+                        , $event)" placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="CodigoTipoInventario">Código<p-sortIcon field="CodigoTipoInventario" /></th>
+                <th pSortableColumn="NombreTipoInventario">Nombre<p-sortIcon field="NombreTipoInventario" /></th>
+                <th>
+                    <div class="flex align-items-center">
+                        Grupo inventario
+                        <p-columnFilter field="NombreGrupo" matchMode="in" display="menu" [showMatchModes]="false"
+                            [showOperator]="false" [showAddButton]="false">
+                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                <p-multiSelect [ngModel]="value" [options]="filterGrupoInventario"
+                                    placeholder="Buscar por ..." (onChange)="filter($event.value)">
+                                    <ng-template let-option pTemplate="item">
+                                        <div class="inline-block vertical-align-middle">
+                                            <span class="ml-1 mt-1">{{ option }}</span>
+                                        </div>
+                                    </ng-template>
+                                </p-multiSelect>
+                            </ng-template>
+                        </p-columnFilter>
+                    </div>
+
+                </th>
+                <th pSortableColumn="DescripcionLineaInventario">Linea inventario<p-sortIcon
+                        field="DescripcionLineaInventario" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-tipoMaterial let-columns="columns" let-rowIndex="rowIndex">
+            <tr>
+                <td>{{tipoMaterial.CodigoTipoInventario}}</td>
+                <td>{{tipoMaterial.NombreTipoInventario}}</td>
+                <td>{{tipoMaterial.NombreGrupo}}</td>
+                <td>{{tipoMaterial.DescripcionLineaInventario}}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>

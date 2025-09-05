@@ -1,0 +1,126 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<p-card header="Listado de Colaboradores">
+    <p-table #dtData [value]="listColaboradores" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingColaboradores"
+        [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['NombreColaborador', 'ApellidoColaborador', 'IdentificacionColaborador', 'NombreCargo']">
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                <div class="flex gap-3">
+                    <p-button label="Agregar" severity="success" icon="fa-solid fa-plus"
+                        (onClick)="onCreateColaborador()"></p-button>
+                    <p-button label="Sincronizar" severity="primary" (onClick)="ngOnInit()"
+                        [loading]="loadingColaboradores" icon="pi pi-sync"></p-button>
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData
+                        , $event)" placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th style="width: 10%">Accion</th>
+                <th pSortableColumn="IdColaborador" style="width:2.5%">Id <p-sortIcon field="IdColaborador" /></th>
+                <th pSortableColumn="Usuario" style="width:2.5%">Usuario<p-sortIcon field="Usuario" /></th>
+                <th pSortableColumn="NombreColaborador">Nombres <p-sortIcon field="NombreColaborador" /></th>
+                <th pSortableColumn="ApellidoColaborador">Apellidos <p-sortIcon field="NombreColaborador" /></th>
+                <th pSortableColumn="IdentificacionColaborador" style="width: 10%;">Identificacion <p-sortIcon
+                        field="IdentificacionColaborador" /></th>
+                <th pSortableColumn="NombreCargo">Cargo <p-sortIcon field="NombreCargo" /></th>
+                <th pSortableColumn="EstadoUsuario" style="width:7.5%">Estado <p-sortIcon field="EstadoUsuario" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-colaborador let-rowIndex="rowIndex">
+            <tr>
+                <td class="flex gap-2 justify-content-center">
+                    <p-button icon="fa-solid fa-user-pen" [raised]="true" severity="primary" pTooltip="Editar"
+                        tooltipPosition="bottom" (onClick)="onEditColaborador(colaborador)"></p-button>
+                </td>
+                <td>{{colaborador.IdColaborador}}</td>
+                <td>{{colaborador.NombreUsuario}}</td>
+                <td>{{colaborador.NombreColaborador}}</td>
+                <td>{{colaborador.ApellidoColaborador}}</td>
+                <td>{{colaborador.IdentificacionColaborador}}</td>
+                <td>{{colaborador.NombreCargo}}</td>
+                <td>
+                    <p-tag *ngIf="colaborador.EstadoUsuario" value="Activado" severity="success" />
+                    <p-tag *ngIf="!colaborador.EstadoUsuario" value="Desactivado" severity="danger" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL DE EDICION Y CREACION-->
+<p-dialog [header]="idColaborador === 0 ? 'Crear usuario':'Editar usuario'" [modal]="true"
+    [(visible)]="modalColaborador" [style]="{ width: '40rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-3" [formGroup]="myFormColaborador" (ngSubmit)="onSaveColaborador()">
+            <div class="flex align-items-center gap-3">
+                <label for="cargo" class="font-semibold w-10rem">Cargo</label>
+                <div class="flex-auto">
+                    <p-dropdown [options]="listCargos" formControlName="idCargo" optionLabel="NombreCargo"
+                        optionValue="IdCargo" [filter]="true" filterBy="NombreCargo" [showClear]="true"
+                        [virtualScroll]="true" [virtualScrollItemSize]="10" placeholder="Seleccionar clientes"
+                        styleClass="w-full" [loading]="loadingCargos">
+                        <ng-template let-cargo pTemplate="item">
+                            <div class="flex align-items-center gap-2">
+                                <div>{{ cargo.NombreCargo }}</div>
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="nombres" class="font-semibold w-10rem">Nombres</label>
+                <input pInputText id="nombres" class="flex-auto" autocomplete="off" formControlName="nombres" />
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="apellidos" class="font-semibold w-10rem">Apellidos</label>
+                <input pInputText id="apellidos" class="flex-auto" autocomplete="off" formControlName="apellidos" />
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="identificacion" class="font-semibold w-10rem">Identificacion</label>
+                <input pInputText id="identificacion" class="flex-auto" autocomplete="off"
+                    formControlName="identificacion">
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="salario" class="font-semibold w-10rem">Salario</label>
+                <div class="flex-auto">
+                    <p-inputNumber formControlName="salario" id="salario" [minFractionDigits]="2" mode="decimal"
+                        [min]="0" class="w-full" styleClass="w-full" />
+                </div>
+            </div>
+            <!--
+            <div class="flex align-items-center gap-3">
+                <label class="font-semibold w-10rem">Fecha Inicio</label>
+                <div class="flex-auto">
+                    <p-calendar styleClass="w-full" formControlName="fechaIni" />
+                </div>
+            </div>
+            -->
+            <div class="flex align-items-center gap-3">
+                <label for="estado" class="font-semibold w-10rem">Estado</label>
+                <div class="flex flex-wrap gap-3 align-items-center">
+                    <div class=" flex align-items-center">
+                        <p-radioButton [value]="true" inputId="radiobtn1" formControlName="estado" />
+                        <label for="radiobtn1" class="ml-2">Activado</label>
+                    </div>
+                    <div class="flex align-items-center">
+                        <p-radioButton [value]="false" inputId="radiobtn2" formControlName="estado" />
+                        <label for="radiobtn2" class="ml-2">Desactivado</label>
+                    </div>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="usuario" class="font-semibold w-10rem">Usuario</label>
+                <input pInputText id="usuario" class="flex-auto" autocomplete="off" formControlName="usuario">
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalColaborador = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>

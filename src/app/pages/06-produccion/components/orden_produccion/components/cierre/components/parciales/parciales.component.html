@@ -1,0 +1,34 @@
+<p-table [value]="cierreService.listParciales" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header" let-columns>
+        <tr>
+            <th class="text-center">#</th>
+            <th class="text-center">Fecha Registro</th>
+            <th class="text-center">Fecha Envio</th>
+            <th class="text-center">Aplica Iva</th>
+            <th class="text-center">Unidad Medida</th>
+            <th class="text-center">Cantidad Solicitada</th>
+            <th class="text-center">Cantidad Producida</th>
+            <th class="text-center">Empleados</th>
+            <th class="text-center">Horas</th>
+            <th class="text-center">Op EtikFlow</th>
+            <th class="text-center">Op Taurus</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+        <tr>
+            <td class="text-center">
+                {{rowIndex + 1}}
+            </td>
+            <td>{{item.FechaRegistro | date}}</td>
+            <td>{{item.FechaEnvio | date}}</td>
+            <td>{{item.AplicaIva }}</td>
+            <td>{{item.UnidadMedida }}</td>
+            <td class="text-right">{{item.CantidadSolicitada}}</td>
+            <td class="text-right">{{item.OpCantidadProducida }}</td>
+            <td class="text-right">{{item.NumeroEmpleados}}</td>
+            <td class="text-right">{{item.NumeroHoras}}</td>
+            <td class="text-center">{{item.OrdenProduccion}}</td>
+            <td class="text-center">{{item.OrdenProduccionTaurus}}</td>
+        </tr>
+    </ng-template>
+</p-table>

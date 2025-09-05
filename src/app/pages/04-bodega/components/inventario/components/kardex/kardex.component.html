@@ -1,0 +1,162 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Listado de kardex del inventario">
+    <div class="flex flex-column gap-2">
+        <div class="flex">
+            <p-button label="Sincronizar" severity="primary" (onClick)="ngOnInit()" [loading]="loadingKardex"
+                icon="pi pi-sync"></p-button>
+        </div>
+        <p-table #dtData [value]="listKardex" [loading]="loadingKardex" [paginator]="true" [rows]="20"
+            styleClass="p-datatable-sm"
+            [globalFilterFields]="['IdKardex','CodigoInterno','CodigoBarras','DescripcionInventario','Ancho','Largo','RazonSocialProveedor','DescripcionEstado']"
+            [responsive]="true" [scrollable]="true" scrollDirection="horizontal" [paginator]="true"
+            [rowsPerPageOptions]="[10, 20, 50, 100]">
+            <ng-template pTemplate="caption">
+                <div class="flex">
+                    <form [formGroup]="myFormSearch" class="flex gap-2" (ngSubmit)="onSearchCotizacion()">
+                        <div class="flex align-items-center gap-3">
+                            <label class="font-semibold">Fecha Inicio</label>
+                            <div class="flex-auto">
+                                <p-calendar styleClass="w-full" formControlName="fechaIni" />
+                            </div>
+                        </div>
+                        <div class="flex align-items-center gap-3">
+                            <label for="" class="font-semibold">Fecha Fin</label>
+                            <div class="flex-auto">
+                                <p-calendar styleClass="w-full" formControlName="fechaFin" />
+                            </div>
+                        </div>
+                        <div class="flex justify-content-center">
+                            <p-button label="Buscar" icon="fa-solid fa-magnifying-glass" severity="primary"
+                                [loading]="loadingKardex" type="submit"></p-button>
+                        </div>
+                    </form>
+                    <span class="p-input-icon-left ml-auto">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData
+                , $event)" placeholder="Filtrar..." />
+                    </span>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header" let-columns>
+                <tr>
+                    <th>Accion</th>
+                    <th>Id</th>
+                    <th pSortableColumn="CodigoInterno">
+                        Sustrato <p-sortIcon field="CodigoInterno" />
+                    </th>
+                    <th pSortableColumn="CodigoBarras">
+                        Codigo barras <p-sortIcon field="CodigoBarras" />
+                    </th>
+                    <th pSortableColumn="DescripcionInventario">
+                        DescripcionInventario <p-sortIcon field="DescripcionInventario" />
+                    </th>
+                    <th pSortableColumn="Ancho">
+                        Ancho(mm) <p-sortIcon field="Ancho" />
+                    </th>
+                    <th pSortableColumn="Largo">
+                        Largo(m) <p-sortIcon field="Largo" />
+                    </th>
+                    <th pSortableColumn="RazonSocialProveedor">
+                        Proveedor <p-sortIcon field="RazonSocialProveedor" />
+                    </th>
+                    <th style="min-width: 200px;">Fecha creacion</th>
+                    <th pSortableColumn="DescripcionEstado">
+                        Estado <p-sortIcon field="DescripcionEstado" />
+                    </th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>
+                        <p-columnFilter type="text" field="IdKardex" matchMode="equals" [showMenu]="false" />
+                    </th>
+                    <th>
+                        <p-columnFilter type="text" field="CodigoInterno" matchMode="contains" [showMenu]="false" />
+                    </th>
+                    <th></th>
+                    <th></th>
+                    <th>
+                        <p-columnFilter type="text" field="Ancho" matchMode="equals" [showMenu]="false" />
+                    </th>
+                    <th>
+                        <p-columnFilter type="text" field="Largo" matchMode="equals" [showMenu]="false" />
+                    </th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item let-columns="columns" let-rowIndex="rowIndex">
+                <tr>
+                    <td>
+                        <div class="flex gap-2">
+                            <p-button icon="fa-solid fa-eye" severity="success" [raised]="true"
+                                (onClick)="onOpenInfoKardex(item)"></p-button>
+                            <p-button icon="fa-solid fa-print" severity="primary"
+                                (onClick)="onImprimirEtiqueta(item)"></p-button>
+                        </div>
+                    </td>
+                    <td class="text-center">{{item.IdKardex}}</td>
+                    <td>{{item.CodigoInterno}}</td>
+                    <td>{{item.CodigoBarras}}</td>
+                    <td>{{item.DescripcionInventario}}</td>
+                    <td>{{item.Ancho | number: '0.0-2'}}</td>
+                    <td>{{item.Largo | number: '0.0-2'}}</td>
+                    <td>{{item.RazonSocialProveedor}}</td>
+                    <td>{{item.FechaRegistro | date : 'dd-MMMM-yyyy'}}</td>
+                    <td>
+                        <p-tag [value]="item.DescripcionEstado" severity="success" *ngIf="item.IdEstado === 9"></p-tag>
+                        <p-tag [value]="item.DescripcionEstado" severity="danger" *ngIf="item.IdEstado === 10"></p-tag>
+                        <p-tag [value]="item.DescripcionEstado" severity="info"
+                            *ngIf="item.IdEstado === 16 || item.IdEstado === 19"></p-tag>
+                        <p-tag [value]="item.DescripcionEstado" severity="warning" *ngIf="item.IdEstado === 15"></p-tag>
+                        <p-tag [value]="item.DescripcionEstado" severity="secondary"
+                            *ngIf="item.IdEstado === 17 || item.IdEstado === 18 || item.IdEstado === 20 || item.IdEstado === 21"></p-tag>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</p-card>
+<!--MODAL LOTE Y PESO-->
+<p-sidebar [(visible)]=" modalEditLote" position="right" [blockScroll]="true" [modal]="true" styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>Modificar Lote y Peso</h5>
+    </ng-template>
+    <div class="mt-2">
+        <form [formGroup]="myFormLote" (ngSubmit)="onSaveLote()">
+            <div class="flex flex-column gap-4">
+                <div class="flex flex-column gap-1">
+                    <label for="peso" class="font-semibold w-10rem">Peso</label>
+                    <div class="flex-auto">
+                        <p-inputNumber formControlName="peso" id="peso" [minFractionDigits]="2" mode="decimal"
+                            locale="es-EC" currency="USD" [min]="0" styleClass="w-10rem" />
+                    </div>
+                </div>
+                <div class="flex flex-column gap-1">
+                    <label for="lote" class="font-semibold w-7rem">Lote</label>
+                    <input pInputText id="lote" class="flex-auto" autocomplete="off" formControlName="lote" />
+                </div>
+                <div class="flex justify-content-center gap-2">
+                    <p-button label="Guardar" severity="success" type="submit" />
+                    <p-button label="Cerrar" severity="secondary" (onClick)="modalEditLote = false" />
+                </div>
+            </div>
+        </form>
+    </div>
+</p-sidebar>
+<!--MODAL-->
+<p-dialog header="Informacion detallada" [modal]="true" [(visible)]="modalInfoKardex" [style]="{ width: '50rem' }"
+    [scrollTop]="true" [maximizable]="true">
+    <div class="flex mt-2 flex-column">
+        <p-fieldset legend="Acciones" *ngIf="infoKardex">
+            <div class="flex gap-3">
+                <p-button label="Editar" icon="fa-solid fa-pencil" severity="success" [raised]="true"
+                    (onClick)="onOpenLote()"
+                    *ngIf="infoKardex.IdEstado === 9 || infoKardex.PesoMaterial === 0"></p-button>
+                <p-button label="Trazabilidad" icon="fa-solid fa-list" severity="primary" [raised]="true"
+                    (onClick)="onGetTrazabilidad()"></p-button>
+            </div>
+        </p-fieldset>
+    </div>
+</p-dialog>

@@ -1,0 +1,36 @@
+export interface AdquisicionOrdenCompraCabeceraInterface {
+    Adjuntos: string | null;
+    CiudadProveedor: string | null;
+    Comentario: string | null;
+    Compra: string | null;
+    DirecionProveedor: string | null;
+    EstadoCompra: number | null;
+    FacturaRemision: string | null;
+    FechaEntrega: Date | null;
+    FechaPago: Date | null;
+    FechaRegistroOrdenCompra: Date | null;
+    FechaRegistroRecepcionCompra: Date | null;
+    IdCompra: number | null;
+    IdentificacionProveedor: string | null;
+    IdProveedor: number | null;
+    NumeroFactura: string | null;
+    NumeroItems: number | null;
+    OrdenCompra: string | null;
+    Plazo: number | null;
+    RazonSocialProveedor: string | null;
+    SecuencialCompra: number | null;
+    SecuencialOrdenCompra: number | null;
+    TarifaIva: number | null;
+    TelefonoProveedor: string | null;
+    UsuarioRegistroOrdenCompra: string | null;
+    ValorBaseImponibleIva: number | null;
+    ValorBruto: number | null;
+    ValorCree: number | null;
+    ValorDescuento: number | null;
+    ValorIva: number | null;
+    ValorNetoCalculado: number | null;
+    ValorRetencionFuente: number | null;
+    ValorRetencionIva: number | null;
+    ValorTotal: number | null;
+}
+

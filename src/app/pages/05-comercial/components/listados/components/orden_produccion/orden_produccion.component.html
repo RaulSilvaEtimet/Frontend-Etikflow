@@ -1,0 +1,166 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Listado de ordenes de producción">
+  <p-table #dtData [value]="listOP" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingOP" [paginator]="true"
+    [rows]="10" styleClass="p-datatable-sm"
+    [globalFilterFields]="['SecuencialOrdenProduccion','FechaRegistro','NombreTrabajo','RazonSocialCliente','SecuencialCotizacion','DescripcionEstado']"
+    [responsive]="true" [scrollable]="true" scrollDirection="horizontal" [rows]="8" [paginator]="true">
+    <ng-template pTemplate="caption">
+      <div class="flex gap-2">
+        <div class="flex">
+          <p-button label="Sincronizar" icon="fa-solid fa-rotate" [raised]="true" severity="primary"
+            (onClick)="ngOnInit()"></p-button>
+        </div>
+        <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData, $event)"
+            placeholder="Filtrar..." />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th pSortableColumn="SecuencialOrdenProduccion">
+          OP <p-sortIcon field="SecuencialOrdenProduccion" />
+        </th>
+        <th pSortableColumn="FechaRegistro">
+          Fecha registro <p-sortIcon field="FechaRegistro" />
+        </th>
+        <th pSortableColumn="NombreTrabajo">
+          Producto <p-sortIcon field="NombreTrabajo" />
+        </th>
+        <th pSortableColumn="RazonSocialCliente">
+          Cliente <p-sortIcon field="RazonSocialCliente" />
+        </th>
+        <th pSortableColumn="SecuencialCotizacion">
+          # Cotización <p-sortIcon field="SecuencialCotizacion" />
+        </th>
+        <th pSortableColumn="DescripcionEstado">
+          Estado <p-sortIcon field="DescripcionEstado" />
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-item let-ri="rowIndex">
+      <tr>
+        <td class="flex gap-2 justify-content-center">
+          <p-button [link]="true" pTooltip="Visualizar" tooltipPosition="bottom"
+            [label]="item.SecuencialOrdenProduccion" (onClick)="onGetInfoAllOP(item)"></p-button>
+        </td>
+        <td>{{item.FechaRegistro | date : 'dd-MMMM-yyyy HH:mm'}}</td>
+        <td>{{item.NombreTrabajo }}</td>
+        <td>{{item.RazonSocialCliente}}</td>
+        <td>{{item.SecuencialCotizacion}}</td>
+        <td>
+          <p-tag [value]="item.DescripcionEstado" severity="secondary"
+            *ngIf="item.IdEstadoOrdenProduccion === 1"></p-tag>
+          <p-tag [value]="item.DescripcionEstado" severity="info"
+            *ngIf="item.IdEstadoOrdenProduccion === 2 || item.IdEstadoOrdenProduccion === 3 || item.IdEstadoOrdenProduccion === 4 || item.IdEstadoOrdenProduccion === 5"></p-tag>
+          <p-tag [value]="item.DescripcionEstado" severity="success" *ngIf="item.IdEstadoOrdenProduccion === 6"></p-tag>
+          <p-tag [value]="item.DescripcionEstado" severity="warning" *ngIf="item.IdEstadoOrdenProduccion === 7"></p-tag>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card>
+<!--MODAL ORDEN PRODUCCION-->
+<p-dialog header="Orden de Producción" [(visible)]="modalInfoAllOP" [modal]="true" [style]="{ width: '55rem' }">
+  <p-tabView *ngIf="infoOP !== undefined && infoProdTerm !== undefined">
+    <p-tabPanel header="Información">
+      <div class="flex flex-column gap-3">
+        <div class="flex justify-content-between">
+          <div class="flex flex-column">
+            <label class="">Orden de Producción</label>
+            <b class="font-bold flex-auto text-2xl">{{infoOP.SecuencialOrdenProduccion}}</b>
+          </div>
+          <div class="flex flex-column">
+            <label class="">Código de producto terminado</label>
+            <b class="font-bold flex-auto text-2xl">{{infoOP.CodigoTrabajo}}</b>
+          </div>
+        </div>
+        <div class="flex flex-column">
+          <label class="">Nombre del producto</label>
+          <b class="font-bold flex-auto text-2xl">{{infoOP.NombreTrabajo}}</b>
+        </div>
+        <div class="flex justify-content-between">
+          <div class="flex flex-column">
+            <label class="">Avance (cm o m)</label>
+            <b class="font-bold flex-auto text-2xl">
+              {{infoProdTerm.AvanceEtiqueta | number: '0.0-2'}}
+            </b>
+          </div>
+          <div class="flex flex-column">
+            <label class="">Ancho (cm)</label>
+            <b class="font-bold flex-auto text-2xl">
+              {{infoProdTerm.AnchoEtiqueta | number: '0.0-2'}}
+            </b>
+          </div>
+          <div class="flex flex-column">
+            <label class="">Nucleo</label>
+            <b class="font-bold flex-auto text-2xl">{{infoProdTerm.Cono}}</b>
+          </div>
+          <div class="flex flex-column">
+            <label class="">Unidades por rollo</label>
+            <b class="font-bold flex-auto text-2xl">
+              {{infoProdTerm.UnidadesPorRollo | number : '0.0-0'}}
+            </b>
+          </div>
+          <div class="flex flex-column">
+            <label class="">Filas</label>
+            <b class="font-bold flex-auto text-2xl">
+              {{infoProdTerm.FilasPorRollo | number: '0.0-0'}}
+            </b>
+          </div>
+        </div>
+        <div class="flex justify-content-between">
+          <div class="flex flex-column">
+            <label class="">Tipo de corte</label>
+            <b class="font-bold flex-auto text-2xl">
+              {{infoProdTerm.TipoCorte}}
+            </b>
+          </div>
+          <div class="flex flex-column">
+            <label class="">Rebobinado</label>
+            <b class="font-bold flex-auto text-2xl">
+              {{infoProdTerm.Rebobinado}}
+            </b>
+          </div>
+          <div class="flex flex-column">
+            <label class="">Cantidad a fabricas</label>
+            <b class="font-bold flex-auto text-2xl">
+              {{infoOP.Cantidad | number: '0.0-0'}}
+            </b>
+          </div>
+        </div>
+      </div>
+    </p-tabPanel>
+    <p-tabPanel header="Materia Prima">
+      <p-table [value]="listMPLiberada" [loading]="loadingMPLiberada" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th>#</th>
+            <th>Codigo Barras</th>
+            <th>Ancho (mm)</th>
+            <th>Largo (m)</th>
+            <th>Area (m2)</th>
+            <th>Tipo</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+          <tr>
+            <td class="text-center">
+              {{rowIndex + 1}}
+            </td>
+            <td>{{item.CodigoBarras}}</td>
+            <td>{{item.Ancho}}</td>
+            <td>{{item.Largo}}</td>
+            <td>{{item.TotalM2}}</td>
+            <td>
+              <p-tag severity="info" value="Liberado" *ngIf="item.TipoRegistro === 1"></p-tag>
+              <p-tag severity="secondary" value="Devuelto" *ngIf="item.TipoRegistro === 2"></p-tag>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-tabPanel>
+  </p-tabView>
+</p-dialog>

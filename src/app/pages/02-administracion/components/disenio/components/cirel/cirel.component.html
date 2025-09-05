@@ -1,0 +1,280 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSendData"></app-blocked-send-info-database>
+<p-card header="Listado de cireles">
+    <p-table #dtData [value]="listCirel" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingCirel"
+        [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['CodigoArte','NombreProducto', 'Cliente', 'Diseniador']">
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                <div class="flex gap-3">
+                    <p-button label="Agregar" severity="success" icon="fa-solid fa-plus" (onClick)="onCreateArte()"
+                        [raised]="true"></p-button>
+                    <p-button label="Sincronizar" icon="pi pi-sync" [loading]="loadingCirel" (onClick)="ngOnInit()"
+                        [raised]="true"></p-button>
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData
+                        , $event)" placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="CodigoArte">CodigoArte<p-sortIcon field="CodigoArte" /></th>
+                <th pSortableColumn="NombreProducto">Nombre Producto<p-sortIcon field="NombreProducto" /></th>
+                <th pSortableColumn="Cliente">Cliente<p-sortIcon field="Cliente" /></th>
+                <th pSortableColumn="Diseniador">Diseñador<p-sortIcon field="Diseniador" /></th>
+                <th pSortableColumn="Estado">Estado<p-sortIcon field="Estado" /></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item let-columns="columns">
+            <tr>
+                <td>
+                    <p-button [label]="item.CodigoArte" [link]="true" (onClick)="onEditArte(item)"></p-button>
+                </td>
+                <td>
+                    {{item.NombreProducto}}
+                </td>
+                <td>
+                    {{item.Cliente}}
+                </td>
+                <td>
+                    {{item.Diseniador}}
+                </td>
+                <td>
+                    <p-tag *ngIf="item.Estado" value="Activado" severity="success" />
+                    <p-tag *ngIf="!item.Estado" value="Desactivado" severity="danger" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL ARTE-->
+<p-dialog [header]="idCirel === 0 ? 'Crear arte':'Editar arte'" [modal]="true" [(visible)]="modalCirel"
+    [maximizable]="true" [style]="{ width: '35rem' }">
+    <form class="flex flex-column gap-3 mt-2" [formGroup]="myForm" (ngSubmit)="onSaveArte()">
+        <p-tabView>
+            <p-tabPanel header="Información">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="codigo" class="font-semibold w-7rem">Código arte</label>
+                        <input pInputText id="codigo" class="flex-auto" autocomplete="off" formControlName="codigo" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="nombre" class="font-semibold w-7rem">Nombre producto</label>
+                        <input pInputText id="nombre" class="flex-auto" autocomplete="off" formControlName="nombre" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="cliente" class="font-semibold w-7rem">Cliente</label>
+                        <input pInputText id="cliente" class="flex-auto" autocomplete="off" formControlName="cliente" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-7rem">Maquina</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="maquina" [options]="listMaquina"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingMaquina" [filter]="true" [filterFields]="['Nombre']"
+                                [virtualScroll]="true" [virtualScrollItemSize]="20">
+                                <ng-template let-item pTemplate="selectedItem">
+                                    <div class="custom-dropdown-item-selected">
+                                        {{ item.Nombre }}
+                                    </div>
+                                </ng-template>
+                                <ng-template let-item pTemplate="item">
+                                    <div class="custom-dropdown-item">
+                                        {{ item.Nombre }}
+                                    </div>
+                                </ng-template>
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="diseniador" class="font-semibold w-7rem">Diseñador</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="diseniador" id="diseniador" [options]="listDiseniador"
+                                placeholder="Escoja una opcion" styleClass="w-full">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="rebobinado" class="font-semibold w-7rem">Rebobinado</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="rebobinado" id="rebobinado" [options]="listRebobinado"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingRebobinado" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="DescripcionRebobinado"
+                                optionLabel="DescripcionRebobinado">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold w-7rem">Estado</label>
+                        <div class="flex flex-wrap gap-3 align-items-center">
+                            <div class="flex align-items-center">
+                                <p-radioButton [value]="true" inputId="radiobtn1" formControlName="estado" />
+                                <label for="radiobtn1" class="ml-2">Habilitado</label>
+                            </div>
+                            <div class="flex align-items-center">
+                                <p-radioButton [value]="false" inputId="radiobtn2" formControlName="estado" />
+                                <label for="radiobtn2" class="ml-2">Deshabilitado</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Medidas">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="cilindro" class="font-semibold w-7rem">Cilindro</label>
+                        <p-inputNumber formControlName="cilindro" [minFractionDigits]="0" mode="decimal" locale="en-US"
+                            currency="USD" [min]="0" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="avance" class="font-semibold w-7rem">Avance (mm)</label>
+                        <p-inputNumber formControlName="avance" [minFractionDigits]="2" mode="decimal" locale="en-US"
+                            currency="USD" [min]="0" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="ancho" class="font-semibold w-7rem">Ancho (mm)</label>
+                        <p-inputNumber formControlName="ancho" id="ancho" [minFractionDigits]="2" mode="decimal"
+                            locale="en-US" currency="USD" [min]="0" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="gapAvance" class="font-semibold w-7rem">Gap Avance (mm)</label>
+                        <p-inputNumber formControlName="gapAvance" id="gapAvance" [minFractionDigits]="2" mode="decimal"
+                            locale="en-US" currency="USD" [min]="0" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="gapAncho" class="font-semibold w-7rem">Gap Ancho (mm)</label>
+                        <p-inputNumber formControlName="gapAncho" id="gapAncho" [minFractionDigits]="2" mode="decimal"
+                            locale="en-US" currency="USD" [min]="0" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="repAvance" class="font-semibold w-7rem">Repetición Avance</label>
+                        <p-inputNumber formControlName="repAvance" id="repAvance" [minFractionDigits]="0" mode="decimal"
+                            locale="en-US" currency="USD" [min]="0" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="repAncho" class="font-semibold w-7rem">Repetición Ancho</label>
+                        <p-inputNumber formControlName="repAncho" id="repAncho" [minFractionDigits]="0" mode="decimal"
+                            locale="en-US" currency="USD" [min]="0" />
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Colores">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="color1" class="font-semibold w-7rem">Color 1</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color1" id="color1" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color2" class="font-semibold w-7rem">Color 2</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color2" id="color2" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color3" class="font-semibold w-7rem">Color 3</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color3" id="color3" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color4" class="font-semibold w-7rem">Color 4</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color4" id="color4" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color5" class="font-semibold w-7rem">Color 5</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color5" id="color5" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color6" class="font-semibold w-7rem">Color 6</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color6" id="color6" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color7" class="font-semibold w-7rem">Color 7</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color7" id="color7" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color8" class="font-semibold w-7rem">Color 8</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color8" id="color8" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Adjuntos" *ngIf="idCirel !== 0">
+                <div class="flex flex-column gap-2">
+                    <div class="flex justify-content-center" *ngIf="getFile !== ''">
+                        <p-button icon="fa-solid fa-palette" label="Ver arte" severity="info" [raised]="true"
+                            (onClick)="onGetFileArte()"></p-button>
+                    </div>
+                    <p-fileUpload chooseLabel="Escoger" uploadLabel="Subir" cancelLabel="Cancelar" [multiple]="false"
+                        accept=".pdf" maxFileSize="10000000" (onSelect)="onUploadFile($event)">
+                        <ng-template pTemplate="content">
+                            <ul *ngIf="uploadedFile !== undefined && uploadedFile">
+                                <span>
+                                    {{ uploadedFile.name }} - {{ uploadedFile.size }} bytes
+                                </span>
+                            </ul>
+                        </ng-template>
+                    </p-fileUpload>
+                </div>
+            </p-tabPanel>
+        </p-tabView>
+        <div class="flex justify-content-end gap-2">
+            <p-button label="Guardar" severity="success" type="submit" />
+            <p-button label="Cerrar" severity="secondary" (onClick)="modalCirel = false" />
+        </div>
+    </form>
+</p-dialog>

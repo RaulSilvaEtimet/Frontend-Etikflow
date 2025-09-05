@@ -1,0 +1,555 @@
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<p-card header="Formulario de cotización">
+    <div class="flex flex-column gap-3">
+        <p-fieldset legend="Cliente">
+            <div *ngIf="infoCabeceraCotizacion !== undefined">
+                <p>{{infoCabeceraCotizacion.RazonSocialCliente}}</p>
+            </div>
+        </p-fieldset>
+        <p-fieldset legend="Items">
+            <p-table [value]="listDetalleCotizacion" [tableStyle]="{'min-width': '50rem'}" styleClass="p-datatable-sm">
+                <ng-template pTemplate="caption">
+                    <div class="flex flex-row gap-3">
+                        <p-button label="Nuevo" icon="fa-solid fa-plus" [raised]="true" severity="primary"
+                            (onClick)="onOpenCotizador()"></p-button>
+                        <p-button label="Repetido" icon="fa-solid fa-sheet-plastic" [raised]="true" severity="success"
+                            (onClick)="onOpenRepetidor()"></p-button>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Num</th>
+                        <th>Descripción</th>
+                        <th>Cantidad a fabricar</th>
+                        <th>Metros cuadrado</th>
+                        <th>Precio Millar</th>
+                        <th>Precio Total</th>
+                        <th>Estado</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item let-ri="rowIndex">
+                    <tr>
+                        <td *ngIf="infoCabeceraCotizacion !== undefined">
+                            <p-button *ngIf="(
+                                    (item.Estado === 1 && infoCabeceraCotizacion.Estado === 1) || 
+                                    (item.Estado === 3 && infoCabeceraCotizacion.Estado === 4) || 
+                                    (item.Estado === 1 && infoCabeceraCotizacion.Estado === 4)
+                                    )" [label]="(ri+1)" [link]="true" (onClick)="onEditCotizacion(item)"
+                                pTooltip="Editar"></p-button>
+                        </td>
+                        <td>{{ item.DescripcionTrabajo }}</td>
+                        <td>{{item.CantidadPorFabricar | number: '0.0-2'}}</td>
+                        <td>{{ item.Totalm2 | number: '0.0-2'}}</td>
+                        <td>{{ item.ValorTotalMillar | currency: 'USD': 'symbol': '0.2-2'}}</td>
+                        <td>{{ item.ValorTotalItem | currency: 'USD': 'symbol': '0.2-2'}}</td>
+                        <td>
+                            <p-tag [value]="item.DescripcionDetalleCotizacion" severity="secondary"
+                                *ngIf="item.Estado === 1"></p-tag>
+                            <p-tag [value]="item.DescripcionDetalleCotizacion" severity="success"
+                                *ngIf="item.Estado === 2"></p-tag>
+                            <p-tag [value]="item.DescripcionDetalleCotizacion" severity="danger"
+                                *ngIf="item.Estado === 3"></p-tag>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-fieldset>
+        <p-fieldset legend="Acciones">
+            <div class="flex justify-content-center gap-2">
+                <p-button label="Enviar a revision" [raised]="true" severity="success"
+                    (onClick)="onSendRevision()"></p-button>
+            </div>
+        </p-fieldset>
+    </div>
+</p-card>
+<!--MODAL PRODUCTO NUEVO COTIZADOR-->
+<p-dialog header="Cotizador" [(visible)]="modalProdNew" [style]="{width: '50vw'}" [modal]="true" [maximizable]="true"
+    [style]="{ width: '55rem' }">
+    <form [formGroup]="myFormCotizador" (ngSubmit)="onSaveCotizador()">
+        <p-tabView>
+            <p-tabPanel header="Información">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="codigoAntiguo" class="font-semibold w-10rem">Codigo antiguo</label>
+                        <input pInputText id="codigoAntiguo" class="flex-auto" autocomplete="off"
+                            formControlName="codigoAntiguo" maxlength="30" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="descripcion" class="font-semibold w-10rem">Descripción</label>
+                        <input pInputText id="descripcion" class="flex-auto" autocomplete="off"
+                            formControlName="descripcion" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="tipoTrabajo" class="font-semibold w-10rem">Tipo trabajo</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="tipoTrabajo" id="tipoTrabajo" [options]="listTipoTrabajo"
+                                placeholder="Escoja una opcion" styleClass="w-full" optionLabel="DescripcionTrabajo"
+                                [filter]="true" [filterFields]="['IdTipoTrabajo', 'DescripcionTrabajo']"
+                                [showClear]="true" [loading]="loadingTipoTrabajo" filterPlaceholder="Buscando..."
+                                (ngModelChange)="onChangeTipoTrabajo($event)" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="tipoInventario" class="font-semibold w-10rem">Materia prima</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="tipoInventario" id="tipoInventario"
+                                [options]="listTipTraTipInv" placeholder="Escoja una opcion" styleClass="w-full"
+                                optionLabel="NombreTipoInventario" [filter]="true"
+                                [filterFields]="['IdTipoInventario', 'NombreTipoInventario']" [showClear]="true"
+                                [loading]="loadingTipTraTipInv" filterPlaceholder="Buscando..." [virtualScroll]="true"
+                                [virtualScrollItemSize]="20">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="unidad" class="font-semibold w-10rem">Unidad</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="unidad" id="unidad" [options]="listUnidad"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="cantidadFabricar" class="font-semibold w-10rem">Cantidad a fabricar</label>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="cantidadFabricar" id="cantidadFabricar"
+                                [minFractionDigits]="0" mode="decimal" locale="es-EC" currency="USD" [min]="0"
+                                styleClass="w-10rem" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="unidadesXRollo" class="font-semibold w-10rem">Unidades por rollo</label>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="unidadesXRollo" id="unidadesXRollo" [minFractionDigits]="0"
+                                mode="decimal" locale="es-EC" currency="USD" [min]="0" styleClass="w-10rem" />
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Detalles">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="conos" class="font-semibold w-10rem">Nucleo</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="conos" id="conos" [options]="listCono"
+                                placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                                [filterFields]="['SiglaCono', 'DescripcionCono']" [showClear]="true"
+                                [loading]="loadingCono" filterPlaceholder="Buscando..." [virtualScroll]="true"
+                                [virtualScrollItemSize]="20">
+                                <ng-template let-cono pTemplate="selectedItem">
+                                    <div class="custom-dropdown-item-selected">
+                                        {{ cono.SiglaCono }} - {{cono.DescripcionCono}}
+                                    </div>
+                                </ng-template>
+                                <ng-template let-cono pTemplate="item">
+                                    <div class="custom-dropdown-item">
+                                        {{ cono.SiglaCono }} - {{cono.DescripcionCono}}
+                                    </div>
+                                </ng-template>
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="rebobinado" class="font-semibold w-10rem">Rebobinado</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="rebobinado" id="rebobinado" [options]="listRebobinados"
+                                placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                                [filterFields]="['IdRebobinado', 'DescripcionRebobinado']" [showClear]="true"
+                                [loading]="loadingRebobinados" filterPlaceholder="Buscando..." [virtualScroll]="true"
+                                [virtualScrollItemSize]="20">
+                                <ng-template let-rebobinado pTemplate="selectedItem">
+                                    <div class="custom-dropdown-item-selected">
+                                        {{ rebobinado.IdRebobinado }} - {{rebobinado.DescripcionRebobinado}}
+                                    </div>
+                                </ng-template>
+                                <ng-template let-rebobinado pTemplate="item">
+                                    <div class="custom-dropdown-item">
+                                        {{ rebobinado.IdRebobinado }} - {{rebobinado.DescripcionRebobinado}}
+                                    </div>
+                                </ng-template>
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="tipoCorte" class="font-semibold w-10rem">Tipo Corte</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="tipoCorte" id="tipoCorte" [options]="listTipoCorte"
+                                placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                                [filterFields]="['descripcion']" [showClear]="true" filterPlaceholder="Buscando..."
+                                [virtualScroll]="true" [virtualScrollItemSize]="20">
+                                <ng-template let-item pTemplate="selectedItem">
+                                    <div class="custom-dropdown-item-selected">
+                                        {{ item.codigo }} - {{item.descripcion}}
+                                    </div>
+                                </ng-template>
+                                <ng-template let-item pTemplate="item">
+                                    <div class="custom-dropdown-item">
+                                        {{ item.codigo }} - {{item.descripcion}}
+                                    </div>
+                                </ng-template>
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="formatoTroquel" class="font-semibold w-10rem">Forma etiqueta</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="formatoTroquel" id="formaEtiqueta"
+                                [options]="listFormatoTroquel" placeholder="Escoja una opcion" styleClass="w-full"
+                                [showClear]="true" [filter]="true">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="flex align-items-center gap-3">
+                            <label for="avance" class="font-semibold w-10rem">Avance (cm o m)</label>
+                            <p-inputNumber formControlName="avance" id="avance" [minFractionDigits]="2" mode="decimal"
+                                locale="es-EC" currency="USD" [min]="0" />
+                        </div>
+                        <div class="flex align-items-center gap-2">
+                            <label class="font-semibold w-10rem">Prepicado</label>
+                            <div class="flex gap-3 justify-content-center">
+                                <div class="flex align-items-center">
+                                    <p-radioButton [value]="true" inputId="radiobtn1" formControlName="prepicado" />
+                                    <label for="radiobtn1" class="ml-2">SI</label>
+                                </div>
+                                <div class="flex align-items-center">
+                                    <p-radioButton [value]="false" inputId="radiobtn2" formControlName="prepicado" />
+                                    <label for="radiobtn2" class="ml-2">NO</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="flex align-items-center gap-3">
+                            <label for="ancho" class="font-semibold w-10rem">Ancho (cm)</label>
+                            <p-inputNumber formControlName="ancho" id="ancho" [minFractionDigits]="2" mode="decimal"
+                                locale="es-EC" currency="USD" [min]="0" />
+                        </div>
+                        <div class="flex align-items-center gap-2">
+                            <label class="font-semibold w-10rem">Corte seguridad</label>
+                            <div class="flex gap-3 justify-content-center">
+                                <div class="flex align-items-center">
+                                    <p-radioButton [value]="true" inputId="radiobtn1"
+                                        formControlName="corteSeguridad" />
+                                    <label for="radiobtn1" class="ml-2">SI</label>
+                                </div>
+                                <div class="flex align-items-center">
+                                    <p-radioButton [value]="false" inputId="radiobtn2"
+                                        formControlName="corteSeguridad" />
+                                    <label for="radiobtn2" class="ml-2">NO</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="flex align-items-center gap-3">
+                            <label for="numFilas" class="font-semibold w-10rem">Número de filas</label>
+                            <p-inputNumber formControlName="numFilas" id="numFilas" [minFractionDigits]="0"
+                                mode="decimal" locale="es-EC" currency="USD" [min]="0" />
+                        </div>
+                        <div class="flex align-items-center gap-2">
+                            <label class="font-semibold w-10rem">Distribuidor</label>
+                            <div class="flex gap-3 justify-content-center">
+                                <div class="flex align-items-center">
+                                    <p-radioButton [value]="true" inputId="radiobtn1" formControlName="distribuidor" />
+                                    <label for="radiobtn1" class="ml-2">SI</label>
+                                </div>
+                                <div class="flex align-items-center">
+                                    <p-radioButton [value]="false" inputId="radiobtn2" formControlName="distribuidor" />
+                                    <label for="radiobtn2" class="ml-2">NO</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Acabados y colores">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="acabados" class="font-semibold w-10rem">Acabados</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="acabados" id="acabados" [options]="listAcabados"
+                                placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                                [filterFields]="['IdAcabado', 'DescripcionAcabado']" [showClear]="true"
+                                [loading]="loadingAcabado" filterPlaceholder="Buscando..." [virtualScroll]="true"
+                                [virtualScrollItemSize]="20">
+                                <ng-template let-cono pTemplate="selectedItem">
+                                    <div class="custom-dropdown-item-selected">
+                                        {{ cono.IdAcabado }} - {{cono.DescripcionAcabado}}
+                                    </div>
+                                </ng-template>
+                                <ng-template let-cono pTemplate="item">
+                                    <div class="custom-dropdown-item">
+                                        {{ cono.IdAcabado }} - {{cono.DescripcionAcabado}}
+                                    </div>
+                                </ng-template>
+                            </p-dropdown>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color1" class="font-semibold w-10rem">Color 1 / Porcentaje</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color1" id="color1" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="porc1" [minFractionDigits]="0" mode="decimal" locale="es-EC"
+                                currency="USD" [min]="0" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color2" class="font-semibold w-10rem">Color 2 / Porcentaje</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color2" id="color2" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="porc2" [minFractionDigits]="0" mode="decimal" locale="es-EC"
+                                currency="USD" [min]="0" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color3" class="font-semibold w-10rem">Color 3 / Porcentaje</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color3" id="color3" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="porc3" [minFractionDigits]="0" mode="decimal" locale="es-EC"
+                                currency="USD" [min]="0" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color4" class="font-semibold w-10rem">Color 4 / Porcentaje</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color4" id="color4" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="porc4" [minFractionDigits]="0" mode="decimal" locale="es-EC"
+                                currency="USD" [min]="0" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color5" class="font-semibold w-10rem">Color 5 / Porcentaje</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color5" id="color1" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="porc5" [minFractionDigits]="0" mode="decimal" locale="es-EC"
+                                currency="USD" [min]="0" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color6" class="font-semibold w-10rem">Color 6 / Porcentaje</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color6" id="color1" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="porc6" [minFractionDigits]="0" mode="decimal" locale="es-EC"
+                                currency="USD" [min]="0" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color7" class="font-semibold w-10rem">Color 7 / Porcentaje</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color7" id="color1" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="porc7" [minFractionDigits]="0" mode="decimal" locale="es-EC"
+                                currency="USD" [min]="0" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="color8" class="font-semibold w-10rem">Color 8 / Porcentaje</label>
+                        <div class="flex-auto">
+                            <p-dropdown formControlName="color8" id="color1" [options]="listPantone"
+                                placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                                [loading]="loadingPantone" [filter]="true" [virtualScroll]="true"
+                                [virtualScrollItemSize]="20" filterBy="CodigoDescripcionPantone"
+                                optionLabel="CodigoDescripcionPantone">
+                            </p-dropdown>
+                        </div>
+                        <div class="flex-auto">
+                            <p-inputNumber formControlName="porc8" [minFractionDigits]="0" mode="decimal" locale="es-EC"
+                                currency="USD" [min]="0" />
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Observaciones">
+                <div class="flex flex-column gap-3">
+                    <div class="flex flex-column">
+                        <label for="observacion">Observación</label>
+                        <textarea rows="5" cols="30" pInputTextarea formControlName="observacion"></textarea>
+                    </div>
+                    <div class="flex flex-column">
+                        <label for="observacion">Observaciones de producción</label>
+                        <ul>
+                            @for (item of listDevueltos; track $index) {
+                            <li class="font-semibold">{{item.ObservacionDevuelto}}</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </p-tabPanel>
+        </p-tabView>
+        <hr>
+        <div class="flex justify-content-center gap-2">
+            <p-button type="submit" label="Guardar" [raised]="true" severity="success"></p-button>
+            <p-button label="Salir" [raised]="true" severity="secondary" (onClick)="modalProdNew= false"></p-button>
+        </div>
+    </form>
+</p-dialog>
+<!--MODAL PRODUCTO REPETIDO COTIZADOR-->
+<p-sidebar [(visible)]="modalProdTerm" position="right" [blockScroll]="true" [modal]="true" styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>PRODUCTO REPETIDO</h5>
+    </ng-template>
+    <form [formGroup]="myFormProdTerm" class="flex flex-column gap-3" (ngSubmit)="onSaveProdTerm()">
+        <div class="flex flex-column gap-1">
+            <label class="font-semibold w-9rem">Cliente</label>
+            <div class="flex-auto">
+                <p-dropdown [options]="listClientes" formControlName="cliente" optionLabel="RazonSocial" [filter]="true"
+                    filterBy="RazonSocial" [showClear]="true" [virtualScroll]="true" [virtualScrollItemSize]="10"
+                    placeholder="Seleccionar clientes" styleClass="w-full" [loading]="loadingClientes"
+                    (ngModelChange)="onGetAllProdTermByCliente($event)">
+                    <ng-template let-cliente pTemplate="item">
+                        <div class="flex align-items-center gap-2">
+                            <div>{{ cliente.RazonSocial }}</div>
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+            </div>
+        </div>
+        <div class="flex flex-column gap-1">
+            <label for="prodTerm" class="font-semibold w-12rem">Producto Terminado</label>
+            <div class="flex-auto">
+                <p-dropdown formControlName="prodTerm" id="prodTerm" [options]="listProdTerm"
+                    placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                    [filterFields]="['CodigoTrabajo', 'NombreTrabajo']" [showClear]="true" [loading]="loadingProdTerm"
+                    filterPlaceholder="Buscando..." (ngModelChange)="onGetInfoProdTermStep1($event)"
+                    [virtualScroll]="true" [virtualScrollItemSize]="20">
+                    <ng-template let-item pTemplate="selectedItem">
+                        <div>{{ item.CodigoTrabajo }}</div>
+                        <div>{{ item.NombreTrabajo }}</div>
+                    </ng-template>
+                    <ng-template let-item pTemplate="item">
+                        <div>{{ item.CodigoTrabajo }}</div>
+                        <div>{{ item.NombreTrabajo }}</div>
+                    </ng-template>
+                </p-dropdown>
+            </div>
+        </div>
+        <div class="flex flex-column gap-1">
+            <label for="cantidadFabricar" class="font-semibold w-10rem">Cantidad a fabricar</label>
+            <div class="flex-auto">
+                <p-inputNumber formControlName="cantidadFabricar" id="cantidadFabricar" [minFractionDigits]="0"
+                    mode="decimal" locale="es-EC" currency="USD" [min]="0" styleClass="w-10rem" />
+            </div>
+        </div>
+        <div class="flex flex-column gap-1">
+            <div class="flex flex-column">
+                <label for="observacion" class="font-semibold">Observación</label>
+                <textarea rows="5" cols="30" pInputTextarea formControlName="observacion"></textarea>
+            </div>
+        </div>
+        <div class="flex flex-column">
+            <label for="observacion" class="font-semibold">Observaciones de producción</label>
+            <ul>
+                @for (item of listDevueltos; track $index) {
+                <li class="font-semibold">{{item.ObservacionDevuelto}}</li>
+                }
+            </ul>
+        </div>
+        <div class="flex justify-content-center">
+            <p-button type="submit" label="Guardar" icon="fa-solid fa-floppy-disk" [raised]="true"
+                severity="success"></p-button>
+        </div>
+        <hr>
+        <div class="flex flex-column gap-3" *ngIf="infoProdTerm !== undefined">
+            <div class="flex flex-column">
+                <label class="">Descripción del trabajo</label>
+                <b class="font-bold flex-auto text-2xl">{{infoProdTerm.NombreProductoEtimet}}</b>
+            </div>
+            <div class="flex flex-column">
+                <label class="">Avance (cm o m)</label>
+                <b class="font-bold flex-auto text-2xl">{{infoProdTerm.AvanceEtiqueta }}</b>
+            </div>
+            <div class="flex flex-column">
+                <label class="">Ancho (cm)</label>
+                <b class="font-bold flex-auto text-2xl">{{infoProdTerm.AnchoEtiqueta }}</b>
+            </div>
+            <div class="flex flex-column">
+                <label class="">Nucleo</label>
+                <b class="font-bold flex-auto text-2xl">
+                    {{infoProdTerm.Cono}}
+                </b>
+            </div>
+            <div class="flex flex-column">
+                <label class="">Unidades por rollo</label>
+                <b class="font-bold flex-auto text-2xl">{{infoProdTerm.UnidadesPorRollo | number:
+                    '0.0'}}</b>
+            </div>
+            <div class="flex flex-column">
+                <label class="">Filas</label>
+                <b class="font-bold flex-auto text-2xl">{{infoProdTerm.FilasPorRollo | number:
+                    '0.0'}}</b>
+            </div>
+            <div class="flex flex-column">
+                <label class="">Tipo de corte</label>
+                <b class="font-bold flex-auto text-2xl">
+                    {{infoProdTerm.TipoCorte}}
+                </b>
+            </div>
+            <div class="flex flex-column">
+                <label class="">Rebobinado</label>
+                <b class="font-bold flex-auto text-2xl">
+                    {{infoProdTerm.Rebobinado}}
+                </b>
+            </div>
+            <div class="flex flex-column">
+                <label class="">Tipo de trabajo</label>
+                <b class="font-bold flex-auto text-2xl">{{infoProdTerm.TipoTrabajo}}</b>
+            </div>
+            <div class="flex flex-column">
+                <label class="">Material</label>
+                <b class="font-bold flex-auto text-2xl">{{infoProdTerm.TipoInventario}}</b>
+            </div>
+        </div>
+    </form>
+</p-sidebar>

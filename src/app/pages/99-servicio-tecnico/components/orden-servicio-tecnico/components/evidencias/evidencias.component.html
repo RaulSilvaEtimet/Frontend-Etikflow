@@ -1,0 +1,28 @@
+<div class="flex gap-3 mb-3">
+    <p-button label="Activar/Desactivar camara" icon="pi pi-camera" severity="success" [rounded]="true"
+        (click)="onActivarWebCam()"></p-button>
+</div>
+<div class="flex flex-row gap-3">
+    <p-fieldset legend="Camara">
+        <div class="flex flex-column align-items-center">
+            @if (showWebcam) {
+            <webcam [height]="500" [width]="500" [trigger]="getImageObservable"
+                (imageCapture)="onControlarImagen($event)" [allowCameraSwitch]="allowCameraSwitch"
+                [switchCamera]="nextWebcamObservable" [videoOptions]="videoOptions" [imageQuality]="1"
+                (cameraSwitched)="cameraWasSwitched($event)" (initError)="handleInitError($event)"></webcam>
+            <p-button label="Capturar foto" [rounded]="true" (click)="onCapturarFoto()"></p-button>
+            }
+        </div>
+    </p-fieldset>
+    <p-fieldset legend="Fotos adjuntas">
+        <div class="flex flex-wrap gap-3">
+            @for (item of arrayWebCamImage; track $index) {
+            <div class="flex flex-column text-center">
+                <p-image [src]=" item.imageAsDataUrl" alt="Image" width="100" [preview]="true" />
+                <p-button icon="pi pi-trash" [rounded]="true" severity="danger" class="align-items-center"
+                    (click)="onDeleteImage($index)"></p-button>
+            </div>
+            }
+        </div>
+    </p-fieldset>
+</div>

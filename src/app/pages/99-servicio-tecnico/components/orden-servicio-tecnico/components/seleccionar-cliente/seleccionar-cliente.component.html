@@ -1,0 +1,28 @@
+<p-fieldset legend="Seleccionar orden">
+    <div class="field">
+        <p-button label="Crear orden" [rounded]="true" severity="success"></p-button>
+    </div>
+    <p-table [value]="clientes" styleClass="p-datatable-striped" [tableStyle]="{'min-width': '50rem'}">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>#</th>
+                <th>Código</th>
+                <th>Fecha</th>
+                <th>Encargado</th>
+                <th>Acciones</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product let-i="rowIndex">
+            <tr>
+                <td>{{ i+1 }}</td>
+                <td>{{ product.codigo }}</td>
+                <td>{{ product.fecha | date: 'dd-MMMM-YYYY / hh:mm' }}</td>
+                <td>{{ product.creador }}</td>
+                <td>
+                    <p-button icon="pi pi-check" [rounded]="true" severity="success" pTooltip="Seleccionar"
+                        tooltipPosition="left"></p-button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-fieldset>

@@ -1,0 +1,58 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSendData"></app-blocked-send-info-database>
+<p-card header="Listado de linea de inventario">
+    <p-table #dtData [value]="listLineaInventario" [tableStyle]="{'min-width': '50rem'}"
+        [loading]="loadingLineaInventario" [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['IdLineaInventario','CodigoLineaInventario','DescripcionLineaInventario']">
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                <div class="flex gap-3">
+                    <p-button label="Agregar" severity="success" icon="fa-solid fa-plus" (onClick)="onOpenModalCreate()"
+                        [raised]="true"></p-button>
+                    <p-button label="Sincronizar" icon="pi pi-sync" [loading]="loadingLineaInventario"
+                        (onClick)="onGetLineaInventario()" [raised]="true"></p-button>
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchLineaInventario" (input)="onGlobalFilter(dtData
+                        , $event)" placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="IdLineaInventario">Id<p-sortIcon field="IdLineaInventario" /></th>
+                <th pSortableColumn="CodigoLineaInventario">Código<p-sortIcon field="CodigoLineaInventario" />
+                </th>
+                <th pSortableColumn="DescripcionLineaInventario">Descripcion<p-sortIcon
+                        field="DescripcionLineaInventario" /></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-lineaInventario let-columns="columns" let-rowIndex="rowIndex">
+            <tr>
+                <td>{{lineaInventario.IdLineaInventario}}</td>
+                <td>{{lineaInventario.CodigoLineaInventario}}</td>
+                <td>{{lineaInventario.DescripcionLineaInventario}}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL CREACION-->
+<p-dialog header="Crear linea de inventario" [modal]="true" [(visible)]="modalInformacion" [style]="{ width: '30rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-3" [formGroup]="myForm" (ngSubmit)="onInsertLineaInventario()">
+            <div class="flex align-items-center gap-3">
+                <label for="descripcion" class="font-semibold w-7rem">Descripción</label>
+                <input pInputText class="flex-auto" autocomplete="off" formControlName="descripcion" />
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="codigo" class="font-semibold w-7rem">Codigo</label>
+                <input pInputText id="codigo" class="flex-auto" autocomplete="off" formControlName="codigo"
+                    maxlength="2" />
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalInformacion = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>

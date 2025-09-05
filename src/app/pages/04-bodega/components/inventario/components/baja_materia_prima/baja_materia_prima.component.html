@@ -1,0 +1,78 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Control de bitacoras en Producción">
+    <div class="flex gap-3">
+        <p-fieldset legend="Formulario de busqueda">
+            <form [formGroup]="myFormSearchMp" class="flex flex-column gap-3" (ngSubmit)="onSearchInfoKardex()">
+                <div class="flex flex-column">
+                    <label for="codigoBarras">Código de barras</label>
+                    <input pInputText id="codigoBarras" class="flex-auto" autocomplete="off"
+                        formControlName="codigoBarras" />
+                </div>
+                <div class="flex justify-content-center">
+                    <p-button type="submit" label="Buscar" icon="fa-solid fa-magnifying-glass" [raised]="true"
+                        severity="primary"></p-button>
+                </div>
+            </form>
+        </p-fieldset>
+        @if(infoKardex !== undefined){
+        <p-fieldset legend="Registros de Bitacora">
+            <div class="flex flex-column gap-2">
+                <div class="flex flex-column">
+                    <label>Materia Prima</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.CodigoInterno}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Código de barras</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.CodigoBarras}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Descripción</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.DescripcionInventario}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Proveedor</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.RazonSocialProveedor}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Ancho (mm)</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.Ancho}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Largo (m)</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.Largo}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Peso (Kg)</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.PesoTotal}}</label>
+                </div>
+                <div class="flex gap-3 justify-content-center">
+                    <p-button label="Baja por duplicado" icon="fa-solid fa-floppy-disk" severity="success"
+                        [raised]="true" (onClick)="onBajaMP(17)"></p-button>
+                    <p-button label="Baja por venta" icon="fa-solid fa-floppy-disk" severity="success" [raised]="true"
+                        (onClick)="onBajaMP(20)"></p-button>
+                    <p-button label="Baja por muestra" icon="fa-solid fa-floppy-disk" severity="success" [raised]="true"
+                        (onClick)="onBajaMP(21)"></p-button>
+                    <p-button label="Baja por produccion" icon="fa-solid fa-floppy-disk" severity="success"
+                        [raised]="true" (onClick)="onBajaOpTaurus()"></p-button>
+                </div>
+            </div>
+        </p-fieldset>
+        }
+    </div>
+</p-card>
+<!--MODAL OP TAURUS-->
+<p-dialog [(visible)]="modalOpTaurus" [modal]="true" [style]="{ width: '20rem' }" [maximizable]="true"
+    header="Baja por Producción">
+    <form class="flex flex-column mt-2 gap-3" [formGroup]="myFormTaurus" (ngSubmit)="onSaveOpTaurus(17)">
+        <div class="flex flex-column gap-1">
+            <label for="numOP" class="font-semibold">Número OP Taurus</label>
+            <p-inputNumber formControlName="numOP" id="numOP" [minFractionDigits]="0" mode="decimal" locale="en-US"
+                currency="USD" [min]="0" />
+        </div>
+        <div class="flex justify-content-center">
+            <p-button type="submit" label="Guardar" icon="fa-solid fa-floppy-disk" severity="success"
+                [raised]="true"></p-button>
+        </div>
+    </form>
+</p-dialog>

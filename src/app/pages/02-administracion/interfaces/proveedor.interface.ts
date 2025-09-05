@@ -1,0 +1,21 @@
+export interface AdministracionProveedorInterface {
+    IdentificacionProveedor: string | null;
+    TipoIdentificacionProveedor: string | null;
+    RazonSocialProveedor: string | null;
+    DireccionProveedor: string | null;
+    Telefono1: string | null;
+    Celular: string | null;
+    Email: string | null;
+    Cash: string | null;
+    Identificacion: string | null;
+    Beneficiario: string | null;
+    Banco: string | null;
+    Cuenta: string | null;
+    TipoCuenta: string | null;
+    Spi: string | null;
+    IdProveedor: number | null;
+    EstadoProveedor: boolean | null;
+    ProveedorNacional: boolean | null;
+    PlazoPago: number | null;
+    TipoPago: string | null;
+}

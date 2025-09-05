@@ -1,0 +1,15 @@
+<div class="layout-sidebar" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+    <div class="sidebar-header">
+        <a [routerLink]="['/home']" class="logo">
+            <div class="logo-image">
+                <img [src]="'assets/intranet/00-login/icono_etimet.jpg'" width="100%" alt="Icono Etimet">
+            </div>
+            <span class="app-name">ETIMET</span>
+        </a>
+        <button class="layout-sidebar-anchor p-link" type="button" (click)="anchor()"></button>
+    </div>
+
+    <div #menuContainer class="layout-menu-container">
+        <app-menu></app-menu>
+    </div>
+</div>

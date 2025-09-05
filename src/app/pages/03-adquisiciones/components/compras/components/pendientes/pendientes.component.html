@@ -1,0 +1,187 @@
+<p-card header="Listado de ordenes de compra pendientes de ingreso">
+    <p-table #dtData [value]="listOrdenesCompra" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingOC"
+        [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['UsuarioRegistroOrdenCompra','OrdenCompra','NumeroItems','RazonSocialProveedor','DescripcionEstadoCompra']"
+        [responsive]="true" [scrollable]="true" scrollDirection="horizontal" [rows]="8" [paginator]="true">
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                <form [formGroup]="myFormSearch" class="flex gap-2" (ngSubmit)="onSearchOrdenCompra()">
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold">Fecha Inicio</label>
+                        <div class="flex-auto">
+                            <p-calendar styleClass="w-full" formControlName="fechaIni" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="" class="font-semibold">Fecha Fin</label>
+                        <div class="flex-auto">
+                            <p-calendar styleClass="w-full" formControlName="fechaFin" />
+                        </div>
+                    </div>
+                    <div class="flex justify-content-center">
+                        <p-button label="Buscar" icon="fa-solid fa-magnifying-glass" severity="primary"
+                            [loading]="loadingOC" type="submit"></p-button>
+                    </div>
+                </form>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData, $event)"
+                        placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th style="min-width:20px">Id</th>
+                <th style="min-width:50px; width: 75px;">Accion</th>
+                <th pSortableColumn="UsuarioRegistroOrdenCompra">
+                    Usuario <p-sortIcon field="UsuarioRegistroOrdenCompra" />
+                </th>
+                <th pSortableColumn="OrdenCompra">
+                    Orden de compra <p-sortIcon field="OrdenCompra" />
+                </th>
+                <th pSortableColumn="NumeroItems">
+                    Items <p-sortIcon field="NumeroItems" />
+                </th>
+                <th pSortableColumn="RazonSocialProveedor">
+                    Proveedor <p-sortIcon field="RazonSocialProveedor" />
+                </th>
+                <th>Fecha creacion</th>
+                <th pSortableColumn="DescripcionEstadoCompra">
+                    Estado <p-sortIcon field="DescripcionEstadoCompra" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-OC let-columns="columns" let-rowIndex="rowIndex">
+            <tr>
+                <td class="text-center">{{OC.IdCompra}}</td>
+                <td class="flex gap-2 justify-content-center">
+                    <p-button icon="fa-solid fa-eye" [raised]="true" severity="success" pTooltip="Visualizar"
+                        tooltipPosition="bottom" (onClick)="onGetDetalleCompra(OC)"></p-button>
+                </td>
+                <td>{{OC.UsuarioRegistroOrdenCompra}}</td>
+                <td>{{OC.OrdenCompra}}</td>
+                <td>{{OC.NumeroItems}}</td>
+                <td>{{OC.RazonSocialProveedor}}</td>
+                <td>{{OC.FechaRegistroOrdenCompra | date : 'dd-MMMM-yyyy HH:mm:ss'}}</td>
+                <td>{{OC.DescripcionEstadoCompra}}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL DE VISUALIZACION-->
+<p-dialog header="Orden de compra" [modal]="true" [(visible)]="visibleModalView" [style]="{ width: '70rem' }"
+    [scrollTop]="true" [maximizable]="true">
+    <div class="mt-2">
+        <div class="flex flex-column gap-3">
+            <p-fieldset legend="Proveedor">
+                <div class="flex flex-column gap-3 justify-content-center">
+                    <div class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-10rem">Razon social</label>
+                        <b class="font-semibold flex-auto text-xl">{{cabecera.RazonSocialProveedor}}</b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-10rem">NIT</label>
+                        <b class="font-semibold flex-auto text-xl">
+                            {{cabecera.IdentificacionProveedor}}
+                        </b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-10rem">Dirección</label>
+                        <b class="font-semibold flex-auto text-xl">{{cabecera.DirecionProveedor}}</b>
+                    </div>
+                </div>
+            </p-fieldset>
+            <p-fieldset legend="Información">
+                <div class="flex flex-column gap-2 justify-content-center">
+                    <div class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-10rem">Fecha creación</label>
+                        <b class="font-semibold flex-auto text-xl">
+                            {{cabecera.FechaRegistroOrdenCompra | date: 'dd-MMMM-yyyy': 'UTC'}}
+                        </b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-10rem">Fecha entrega</label>
+                        <b class="font-semibold flex-auto text-xl">
+                            {{cabecera.FechaEntrega | date: 'dd-MMMM-yyyy': 'UTC'}}
+                        </b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-10rem">Plazo</label>
+                        <b class="font-semibold flex-auto text-xl">{{cabecera.Plazo}} días</b>
+                    </div>
+                    <!--
+                    <div class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-10rem">Subtotal</label>
+                        <b class="font-semibold flex-auto text-xl">
+                            {{cabecera.ValorBaseImponibleIva | currency :'USD'}}
+                        </b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-10rem">Iva</label>
+                        <b class="font-semibold flex-auto text-xl">
+                            {{cabecera.ValorIva | currency :'USD'}}
+                        </b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-10rem">Total</label>
+                        <b class="font-semibold flex-auto text-xl">{{cabecera.ValorTotal | currency :'USD'}}</b>
+                    </div>
+                    -->
+                </div>
+            </p-fieldset>
+            <p-fieldset legend="Detalles">
+                <p-table #dtData [value]="detalles" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingOC"
+                    styleClass="p-datatable-sm p-datatable-striped" [responsive]="true" [scrollable]="true"
+                    scrollDirection="horizontal" [scrollTop]="true">
+                    <ng-template pTemplate="header" let-columns>
+                        <tr>
+                            <th>Id</th>
+                            <th>Descripció</th>
+                            <th>Sustrato</th>
+                            <th>Bobinas</th>
+                            <th>Ancho</th>
+                            <th>Largo</th>
+                            <th class="text-right">M2</th>
+                            <th class="text-right">Precio</th>
+                            <th class="text-right">Valor</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-detalle let-rowIndex="rowIndex">
+                        <tr>
+                            <td>{{detalle.NumeroItemDetalleCompra}}</td>
+                            <td>{{detalle.DescripcionDetalleCompra}}</td>
+                            <td>{{detalle.CodigoInternoSustrato}}</td>
+                            <td>{{detalle.CantidadCompra}}</td>
+                            <td>{{detalle.AnchoDetalleCompra}}</td>
+                            <td>{{detalle.LargoDetalleCompra }}</td>
+                            <td class="text-right">{{detalle.CantidadDetalleCompra}}</td>
+                            <td class="text-right">{{detalle.ValorDetalleCompra | currency: 'USD':'symbol':'1.4-4'}}
+                            </td>
+                            <td class="text-right">{{detalle.ValorTotalDetalleCompra | currency:
+                                'USD':'symbol':'1.4-4'}}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-fieldset>
+            <p-fieldset legend="Adjuntos" *ngIf="cabecera.Adjuntos !== null">
+                <div class="flex gap-3">
+                    <p-button label="Packing List" icon="fa-solid fa-eye" severity="primary"
+                        (onClick)="onGetFile(0)"></p-button>
+                </div>
+            </p-fieldset>
+            <p-fieldset legend="Acciones">
+                <div class="flex gap-3" *ngIf="cabecera.EstadoCompra === 4">
+                    <p-button label="Aceptar orden de compra" icon="fa-solid fa-check" severity="success"
+                        (onClick)="onAceptCompra()"></p-button>
+                    <p-button label="Volver a orden de compra" icon="fa-solid fa-xmark" severity="danger"
+                        (onClick)="onCancelCompra()"></p-button>
+                </div>
+                <div class="flex gap-3" *ngIf="cabecera.EstadoCompra === 5">
+                    <p-button label="Ingresar lotes" icon="fa-solid fa-dolly" severity="success"
+                        (onClick)="onGenerateLotes(cabecera.IdCompra!)"></p-button>
+                </div>
+            </p-fieldset>
+        </div>
+    </div>
+</p-dialog>

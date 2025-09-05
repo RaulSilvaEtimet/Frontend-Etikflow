@@ -1,0 +1,33 @@
+<app-blocked-get-info-database [blockedPanel]="cierreService.blockedGet"></app-blocked-get-info-database>
+<app-blocked-send-info-database [blockedPanel]="cierreService.blockedSend"></app-blocked-send-info-database>
+<p-card header="Cierre de Orden de Producción">
+    <div class="flex justify-content-center">
+        <form [formGroup]="myFormOp" class="flex align-items-center gap-3" (ngSubmit)="onSearchOP()">
+            <label for="cilindro" class="font-semibold w-7rem">Número de OP</label>
+            <p-inputNumber formControlName="numOp" [minFractionDigits]="0" locale="en-US" [min]="0" />
+            <p-button type="submit" label="Buscar" icon="fa-solid fa-magnifying-glass" [raised]="true"
+                severity="primary"></p-button>
+        </form>
+    </div>
+    <hr>
+    <p-tabView>
+        <p-tabPanel header="Información de OP" [selected]="true">
+            <app-produccion-orden-produccion-cierre-info-op></app-produccion-orden-produccion-cierre-info-op>
+        </p-tabPanel>
+        <p-tabPanel header="Materia prima liberada">
+            <app-produccion-orden-produccion-cierre-mp-liberada></app-produccion-orden-produccion-cierre-mp-liberada>
+        </p-tabPanel>
+        <p-tabPanel header="Bitacora">
+            <app-produccion-orden-produccion-cierre-bitacora></app-produccion-orden-produccion-cierre-bitacora>
+        </p-tabPanel>
+        <p-tabPanel header="Valores Generados">
+            <app-produccion-orden-produccion-cierre-valores-generados></app-produccion-orden-produccion-cierre-valores-generados>
+        </p-tabPanel>
+        <p-tabPanel header="Parciales">
+            <app-produccion-orden-produccion-cierre-parciales></app-produccion-orden-produccion-cierre-parciales>
+        </p-tabPanel>
+        <p-tabPanel header="Enviar">
+            <app-produccion-orden-produccion-cierre-enviar></app-produccion-orden-produccion-cierre-enviar>
+        </p-tabPanel>
+    </p-tabView>
+</p-card>

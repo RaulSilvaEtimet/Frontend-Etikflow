@@ -1,0 +1,562 @@
+<app-blocked-send-info-database [blockedPanel]="blockedPanelSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedPanelGet"></app-blocked-get-info-database>
+<app-blocked-process-info-database [blockedPanel]="blocekdPanelProcess"></app-blocked-process-info-database>
+<p-card header="Datos de la importación">
+    <p-tabView>
+        <p-tabPanel header="Distribucion de gastos">
+            <div class="flex flex-column gap-3">
+                <div class="flex gap-3">
+                    <p-button label="Distribuir Gastos" icon="fa-solid fa-calculator" severity="primary" [raised]="true"
+                        (onClick)="onOpenDistribucion()"></p-button>
+                    <p-button label="Guardar distribucion" icon="fa-solid fa-floppy-disk" severity="success"
+                        [raised]="true" (onClick)="onSaveDistribucion()"></p-button>
+                </div>
+                <p-table [value]="listDistribuir" [tableStyle]="{'min-width': '50rem'}" styleClass="p-datatable-sm">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>#</th>
+                            <th>Codigo</th>
+                            <th>Descripcion</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Subtotal</th>
+                            <th>Costo Importacion</th>
+                            <th>Precio Unitario Venta</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-distribuir let-ri="rowIndex">
+                        <tr>
+                            <td>{{ (ri+1) }}</td>
+                            <td>{{ distribuir.CodigoInterno }}</td>
+                            <td>{{ distribuir.Descripcion }}</td>
+                            <td>{{ distribuir.Cantidad }}</td>
+                            <td>{{ distribuir.PrecioUnitario | currency: 'USD':'symbol':'1.2-6'}}</td>
+                            <td>{{ distribuir.TotalItem | currency: 'USD':'symbol':'1.2-6' }}</td>
+                            <td>{{ distribuir.CostoImportacion | currency: 'USD':'symbol':'1.2-6' }}</td>
+                            <td>{{ distribuir.PrecioUnitarioVenta | currency: 'USD':'symbol':'1.2-6' }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Liquidacion Aduanera">
+            <p-button label="Editar" icon="fa-solid fa-pencil" severity="primary" [raised]="true"
+                (onClick)="onEditInfoImportacion()"></p-button>
+            <div class="grid justify-content-center">
+                <p-card header="Totalizados" class="col-12 md:col-4">
+                    <div class="flex flex-column gap-3">
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Valor Liquidado</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-2xl text-orange-500">
+                                    {{infoImportacion.ValorLiquidado| currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Gastos a distribuir</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-2xl text-orange-500">
+                                    {{infoImportacion.GastosDistribuir| currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+            <div class="grid">
+                <p-card header="Derechos arancelarios" class="col-12 md:col-4">
+                    <div class="flex flex-column gap-3">
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Arancel advalorem</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.ArancelAdvaloren | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Arancel especifico</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.ArancelEspecifico | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Antidumping</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.Antiduping | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+                <p-card header="Impuestos" class="col-12 md:col-4">
+                    <div class="flex flex-column gap-3">
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Fondinfa</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.Fodinfa | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Ice advalorem</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.IceAdvaloren | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Ice especifico</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.IceEspecifico | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Iva</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.Iva | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+                <p-card header="Tasas" class="col-12 md:col-4">
+                    <div class="flex flex-column gap-3">
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Tasa de vigencia aduanera</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.TasaAduanera | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+                <p-card header="Recargos arancelarios" class="col-12 md:col-4">
+                    <div class="flex flex-column gap-3">
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Salvaguardia</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.Salvaguardia | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Salvaguardia especifica</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.SalvaguardiaEspecifica | currency: 'USD':
+                                    'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+                <p-card header="Otros gastos" class="col-12 md:col-4">
+                    <div class="flex flex-column gap-3">
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Interes</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.Intereses | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Multas</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.Multas | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                        <div class="flex align-items-center gap-3">
+                            <label for="bobina" class="font-semibold w-10rem">Otros</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-xl">
+                                    {{infoImportacion.Otros | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Ordenes de compra">
+            <div class="flex flex-column gap-3">
+                <p-card header="Ordenes de compra">
+                    <p-table [value]="listOrdenesCompra" [tableStyle]="{'min-width': '50rem'}"
+                        styleClass="p-datatable-sm">
+                        <ng-template pTemplate="caption">
+                            <p-button label="Agregar" icon="fa-solid fa-plus" severity="primary" [raised]="true"
+                                (onClick)="onOpenOrdComImp()"></p-button>
+                        </ng-template>
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>#</th>
+                                <th>Acciones</th>
+                                <th>Id</th>
+                                <th>Orden de compra</th>
+                                <th>Proveedor</th>
+                                <th>Total</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-impOC let-ri="rowIndex">
+                            <tr>
+                                <td>{{ (ri+1) }}</td>
+                                <td>
+                                    <div class="flex gap-2">
+                                        <p-button icon="fa-solid fa-trash" severity="danger" [raised]="true"
+                                            (onClick)="onDeleteImpOC(impOC)"></p-button>
+                                    </div>
+                                </td>
+                                <td>{{ impOC.IdCompra }}</td>
+                                <td>{{ impOC.OrdenCompra }}</td>
+                                <td>{{ impOC.RazonSocialProveedor }}</td>
+                                <td>{{ impOC.ValorTotal | currency: 'USD':'symbol':'1.2-2' }}</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </p-card>
+                <p-card header="Detalle de las ordenes de compra">
+                    <p-table [value]="listDetalleOrdenesCompra" [tableStyle]="{'min-width': '50rem'}"
+                        styleClass="p-datatable-sm">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>#</th>
+                                <th>Codigo</th>
+                                <th>Descripcion</th>
+                                <th>Cantidad</th>
+                                <th>Precio</th>
+                                <th>Total</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-impOC let-ri="rowIndex">
+                            <tr>
+                                <td>{{ (ri+1) }}</td>
+                                <td>{{ impOC.CodigoInternoSustrato}}</td>
+                                <td>{{ impOC.DescripcionDetalleCompra }}</td>
+                                <td>{{ impOC.CantidadDetalleCompra }}</td>
+                                <td class="text-right">
+                                    {{ impOC.ValorDetalleCompra | currency: 'USD':'symbol':'1.2-2' }}
+                                </td>
+                                <td class="text-right">
+                                    {{ impOC.ValorTotalDetalleCompra | currency: 'USD':'symbol':'1.2-2' }}
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </p-card>
+                <p-card header="Consolidado de las ordenes de compra">
+                    <p-table [value]="listConsolidadoOrdenesCompra" [tableStyle]="{'min-width': '50rem'}"
+                        styleClass="p-datatable-sm">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>#</th>
+                                <th>Codigo</th>
+                                <th>Descripcion</th>
+                                <th>Cantidad</th>
+                                <th>Precio</th>
+                                <th>Total</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-impOC let-ri="rowIndex">
+                            <tr>
+                                <td>{{ (ri+1) }}</td>
+                                <td>{{ impOC.CodigoInternoSustrato}}</td>
+                                <td>{{ impOC.DescripcionDetalleCompra }}</td>
+                                <td>{{ impOC.CantidadDetalleCompra }}</td>
+                                <td class="text-right">
+                                    {{ impOC.ValorDetalleCompra | currency: 'USD':'symbol':'1.2-2' }}
+                                </td>
+                                <td class="text-right">
+                                    {{ impOC.ValorTotalDetalleCompra | currency: 'USD':'symbol':'1.2-2' }}
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </p-card>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Gastos de importacion">
+            <p-table [value]="listGastosLocales" [loading]="loadingGastosLocales" [tableStyle]="{'min-width': '50rem'}"
+                styleClass="p-datatable-sm">
+                <ng-template pTemplate="caption">
+                    <div class="flex justify-content-between">
+                        <p-button label="Agregar" icon="fa-solid fa-plus" severity="primary" [raised]="true"
+                            (onClick)="onOpenAddGastoLocal()"></p-button>
+                        <div class="flex align-items-center gap-3 mr-7">
+                            <label for="bobina" class="font-semibold w-6rem">Totalizado:</label>
+                            <div class="flex-auto">
+                                <b class="font-semibold flex-auto text-2xl text-orange-500">
+                                    {{totalGastosLocales | currency: 'USD': 'symbol':'0.2-4'}}
+                                </b>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>#</th>
+                        <th>Acciones</th>
+                        <th>Proveedor</th>
+                        <th>Fecha emision</th>
+                        <th>Tipo Documento</th>
+                        <th>Numero documento</th>
+                        <th>Total</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-gastoLocal let-ri="rowIndex">
+                    <tr>
+                        <td>{{ (ri+1) }}</td>
+                        <td>
+                            <div class="flex gap-2">
+                                <p-button icon="fa-solid fa-pencil" severity="primary" [raised]="true"
+                                    (onClick)="onEditGastoLocal(gastoLocal)"></p-button>
+                                <p-button icon="fa-solid fa-trash" severity="danger" [raised]="true"></p-button>
+                            </div>
+                        </td>
+                        <td>{{ gastoLocal.Proveedor }}</td>
+                        <td>{{ gastoLocal.FechaEmision | date: "d MMM y" }}</td>
+                        <td>{{ gastoLocal.TipoDocumento }}</td>
+                        <td>{{ gastoLocal.NumeroDocumento }}</td>
+                        <td>{{ gastoLocal.Total | currency: 'USD':'symbol':'1.2-2' }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-tabPanel>
+    </p-tabView>
+</p-card>
+<!--MODAL INFO IMPORTACIONES-->
+<p-dialog header="Valores de importacion" [modal]="true" [(visible)]="modalInfoImportacion" [style]="{ width: '60rem' }"
+    [maximizable]="true">
+    <div class="mt-2">
+        <form class="grid" [formGroup]="myFormImportacion" (ngSubmit)="onSaveInfoImportacion()">
+            <p-card class="col-12 md:col-6" header="Derechos arancelarios">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Arancel advalorem</label>
+                        <p-inputNumber formControlName="arancelAdvalorem" id="bobina" [minFractionDigits]="2"
+                            mode="decimal" [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Arancel especifico</label>
+                        <p-inputNumber formControlName="arancelEspecifico" id="bobina" [minFractionDigits]="2"
+                            mode="decimal" [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Antidumping</label>
+                        <p-inputNumber formControlName="antidumping" id="bobina" [minFractionDigits]="2" mode="decimal"
+                            [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                </div>
+            </p-card>
+            <p-card class="col-12 md:col-6" header="Impuestos">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Fondinfa</label>
+                        <p-inputNumber formControlName="fondinfa" id="bobina" [minFractionDigits]="2" mode="decimal"
+                            [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Ice advalorem</label>
+                        <p-inputNumber formControlName="iceAdvalorem" id="bobina" [minFractionDigits]="2" mode="decimal"
+                            [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Ice especifico</label>
+                        <p-inputNumber formControlName="iceEspecifico" id="bobina" [minFractionDigits]="2"
+                            mode="decimal" [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Iva</label>
+                        <p-inputNumber formControlName="iva" id="bobina" [minFractionDigits]="2" mode="decimal"
+                            [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                </div>
+            </p-card>
+            <p-card class="col-12 md:col-6" header="Tasas">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Tasa de vigencia aduanera</label>
+                        <p-inputNumber formControlName="tasaVigenciaAduanera" id="bobina" [minFractionDigits]="2"
+                            mode="decimal" [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                </div>
+            </p-card>
+            <p-card class="col-12 md:col-6" header="Recargos arancelarios">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Salvaguardia</label>
+                        <p-inputNumber formControlName="salvaguardia" id="bobina" [minFractionDigits]="2" mode="decimal"
+                            [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Salvaguardia especifica</label>
+                        <p-inputNumber formControlName="salvaguardiaEspecifica" id="bobina" [minFractionDigits]="2"
+                            mode="decimal" [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                </div>
+            </p-card>
+            <p-card class="col-12 md:col-6" header="Otros gastos">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Interes</label>
+                        <p-inputNumber formControlName="interes" id="bobina" [minFractionDigits]="2" mode="decimal"
+                            [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Multas</label>
+                        <p-inputNumber formControlName="multas" id="bobina" [minFractionDigits]="2" mode="decimal"
+                            [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Otros</label>
+                        <p-inputNumber formControlName="otros" id="bobina" [minFractionDigits]="2" mode="decimal"
+                            [min]="0" (ngModelChange)="onChangeValoresImportacion()" />
+                    </div>
+                </div>
+            </p-card>
+            <p-card class="col-12 md:col-6" header="Valores">
+                <div class="flex flex-column gap-2">
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Valor Liquidado</label>
+                        <div class="flex-auto">
+                            <b class="font-semibold flex-auto text-2xl text-orange-500">
+                                {{valorLiquidado | currency: 'USD': 'symbol':'0.2-4'}}
+                            </b>
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="bobina" class="font-semibold w-10rem">Valor distribuir</label>
+                        <div class="flex-auto">
+                            <b class="font-semibold flex-auto text-2xl text-orange-500">
+                                {{ valorDistribuir | currency: 'USD': 'symbol':'0.2-4'}}
+                            </b>
+                        </div>
+                    </div>
+                </div>
+            </p-card>
+            <div class="col-12">
+                <div class="flex justify-content-center gap-2">
+                    <p-button label="Guardar" icon="fa-solid fa-floppy-disk" severity="success" [raised]="true"
+                        type="submit"></p-button>
+                    <p-button label="Cerrar" severity="secondary" (onClick)="modalAddGastoLocal = false" />
+                </div>
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL DE AGREGAR GASTO LOCAL-->
+<p-dialog [header]="headerModalGastoLocal ? 'Crear gasto local':'Editar gasto local'" [modal]="true"
+    [(visible)]="modalAddGastoLocal" [style]="{ width: '40rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-2" [formGroup]="myFormGastoLocales" (ngSubmit)="onSaveGastoLocal()">
+            <div class="flex align-items-center gap-3">
+                <label for="proveedor" class="font-semibold w-10rem">Proveedor</label>
+                <div class="flex-auto">
+                    <p-dropdown formControlName="proveedor" [options]="listProveedor" placeholder="Escoja una opcion"
+                        styleClass="w-full" [filter]="true" [filterFields]="['RazonSocialProveedor']" [showClear]="true"
+                        filterPlaceholder="Buscando..." [virtualScroll]="true" [virtualScrollItemSize]="20"
+                        [loading]="loadingProveedor" optionValue="RazonSocialProveedor">
+                        <ng-template let-prov pTemplate="selectedItem">
+                            <div class="custom-dropdown-item">
+                                {{ prov.RazonSocialProveedor }}
+                            </div>
+                        </ng-template>
+                        <ng-template let-prov pTemplate="item">
+                            <div class="custom-dropdown-item">
+                                {{ prov.RazonSocialProveedor }}
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="proveedor" class="font-semibold w-10rem">Fecha Emision</label>
+                <div class="flex-auto">
+                    <p-calendar dateFormat="dd-mm-yy" formControlName="fechaEmision" />
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="tipoDocumento" class="font-semibold w-10rem">Tipo documento</label>
+                <div class="flex-auto">
+                    <p-dropdown formControlName="tipoDocumento" [options]="listTipoDocumentos"
+                        placeholder="Escoja una opcion" styleClass="w-full"></p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="numeroDocumento" class="font-semibold w-10rem">Numero documento</label>
+                <input pInputText id="numeroDocumento" class="flex-auto" autocomplete="off"
+                    formControlName="numeroDocumento" />
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="total" class="font-semibold w-10rem">Total</label>
+                <p-inputNumber formControlName="total" id="total" [minFractionDigits]="2" mode="decimal" [min]="0" />
+            </div>
+            <div class="flex justify-content-center gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalAddGastoLocal = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL ORDENES DE COMPRA-->
+<p-dialog header="Ordenes de compra" [modal]="true" [(visible)]="modalOrdComImp" [style]="{width: '50rem'}"
+    [scrollTop]="true">
+    <div class="mt-2">
+        <form [formGroup]="myFormOrdCom" class="flex flex-column gap-3" (ngSubmit)="onAddOrdenesCompra()">
+            @if (loadingOrdComImp) {
+            <p-progressSpinner *ngIf="loadingOrdComImp" styleClass="w-3rem h-3rem" strokeWidth="5"
+                fill="var(--surface-ground)" animationDuration=".8s" />
+            }@else{
+            <div class="flex align-items-center gap-3">
+                <label for="nombre" class="font-semibold w-7rem">Ordenes de compra</label>
+                <div class="flex-auto">
+                    <p-listbox [options]="listOCI" [style]="{ width: '15rem' }" [multiple]="true" styleClass="w-full"
+                        formControlName="selectOC" optionValue="IdCompra">
+                        <ng-template let-item pTemplate="item">
+                            <div class="flex flex-column">
+                                <span>{{item.OrdenCompra}}</span>
+                                <span>{{item.RazonSocialProveedor}}</span>
+                                <span>{{item.ValorTotal | currency: 'USD': 'symbol':'0.2-4'}}</span>
+                            </div>
+                        </ng-template>
+                    </p-listbox>
+                </div>
+            </div>
+            }
+            <p-button icon="fa-solid fa-floppy-disk" severity="success" [raised]="true" label="Crear"
+                type="submit"></p-button>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL CONFIRM DISTRIBUCION-->
+<p-dialog header="Ganancia" [modal]="true" [(visible)]="modalDistribucion" [style]="{ width: '25rem' }">
+    <div class="mt-2">
+        <form [formGroup]="myFormDistribucion" class="flex flex-column gap-3" (ngSubmit)="onRedistribuir()">
+            <div class="flex align-items-center gap-3">
+                <label for="porcentaje" class="font-semibold w-10rem">Margen de ganancia (%)</label>
+                <div class="flex-auto">
+                    <input pInputText id="porcentaje" styleClass="w-full" autocomplete="off"
+                        formControlName="porcentaje" />
+                </div>
+            </div>
+            <div class="flex justify-content-center">
+                <p-button icon="fa-solid fa-calculator" severity="success" [raised]="true" label="Calcular"
+                    type="submit"></p-button>
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<p-toast position="top-right"></p-toast>

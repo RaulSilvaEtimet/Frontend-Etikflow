@@ -1,0 +1,290 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Listado de ordenes de producción pendientes de liberación">
+    <p-table #dtData [value]="listOP" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingOP" [paginator]="true"
+        [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['SecuencialOrdenProduccion','FechaRegistro','NombreTrabajo','RazonSocialCliente','SecuencialCotizacion','DescripcionEstado']"
+        [responsive]="true" [scrollable]="true" scrollDirection="horizontal" [rows]="8" [paginator]="true">
+        <ng-template pTemplate="caption">
+            <div class="flex gap-2">
+                <div class="flex">
+                    <p-button label="Sincronizar" icon="fa-solid fa-rotate" [raised]="true" severity="primary"
+                        (onClick)="ngOnInit()"></p-button>
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData, $event)"
+                        placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th style="width: 120px;" pSortableColumn="SecuencialOrdenProduccion">
+                    OP <p-sortIcon field="SecuencialOrdenProduccion" />
+                </th>
+                <th pSortableColumn="FechaRegistro">
+                    Fecha registro <p-sortIcon field="FechaRegistro" />
+                </th>
+                <th pSortableColumn="NombreTrabajo">
+                    Producto <p-sortIcon field="NombreTrabajo" />
+                </th>
+                <th pSortableColumn="RazonSocialCliente">
+                    Cliente <p-sortIcon field="RazonSocialCliente" />
+                </th>
+                <th pSortableColumn="SecuencialCotizacion">
+                    # Cotización <p-sortIcon field="SecuencialCotizacion" />
+                </th>
+                <th pSortableColumn="DescripcionEstado">
+                    Estado <p-sortIcon field="DescripcionEstado" />
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    <p-columnFilter type="text" field="SecuencialOrdenProduccion" matchMode="equals"
+                        [showMenu]="false" />
+                </th>
+                <th></th>
+                <th>
+                    <p-columnFilter type="text" field="NombreTrabajo" matchMode="contains" [showMenu]="false" />
+                </th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item let-ri="rowIndex">
+            <tr>
+                <td class="flex gap-2 justify-content-center">
+                    <p-button [link]="true" pTooltip="Visualizar" tooltipPosition="bottom"
+                        [label]="item.SecuencialOrdenProduccion" (onClick)="onGetInfoAllOP(item)"></p-button>
+                </td>
+                <td>{{item.FechaRegistro | date : 'dd-MMMM-yyyy HH:mm'}}</td>
+                <td>{{item.NombreTrabajo }}</td>
+                <td>{{item.RazonSocialCliente}}</td>
+                <td>{{item.SecuencialCotizacion}}</td>
+                <td>
+                    <p-tag [value]="item.DescripcionEstado" severity="secondary"
+                        *ngIf="item.IdEstadoOrdenProduccion === 1"></p-tag>
+                    <p-tag [value]="item.DescripcionEstado" severity="success"
+                        *ngIf="item.IdEstadoOrdenProduccion === 2"></p-tag>
+                    <p-tag [value]="item.DescripcionEstado" severity="info"
+                        *ngIf="item.IdEstadoOrdenProduccion === 3 || item.IdEstadoOrdenProduccion === 4 || item.IdEstadoOrdenProduccion === 5 || item.IdEstadoOrdenProduccion === 6"></p-tag>
+                    <p-tag [value]="item.DescripcionEstado" severity="warning"
+                        *ngIf="item.IdEstadoOrdenProduccion === 7"></p-tag>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL VER COTIZACION-->
+<p-dialog header="Orden de Producción" [(visible)]="modalInfoAllOP" [modal]="true" [style]="{ width: '60rem' }">
+    <p-tabView
+        *ngIf="infoOP !== undefined && infoProdTerm !== undefined && infoProcFabr !== undefined && infoCirel !== undefined && infoCabecera !== undefined && infoDetalle !== undefined">
+        <p-tabPanel header="Información">
+            <div class="flex flex-column gap-3">
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Orden de Producción</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoOP.SecuencialOrdenProduccion}}</b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Código de producto terminado</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoOP.CodigoTrabajo}}</b>
+                    </div>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Nombre del producto</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoOP.NombreTrabajo}}</b>
+                </div>
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Avance (cm o m)</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoProdTerm.AvanceEtiqueta | number: '0.0-2'}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Ancho (cm)</label>
+                        <b class="font-bold flex-auto text-2xl">
+
+                            {{infoProdTerm.AnchoEtiqueta | number: '0.0-2'}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Nucleo</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoProdTerm.Cono}}</b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Unidades por rollo</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoProdTerm.UnidadesPorRollo | number : '0.0-0'}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Filas</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoProdTerm.FilasPorRollo | number: '0.0-0'}}
+                        </b>
+                    </div>
+                </div>
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Tipo de corte</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoProdTerm.TipoCorte}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Rebobinado</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoProdTerm.Rebobinado}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Cantidad a fabricas</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoOP.Cantidad | number: '0.0-0'}}
+                        </b>
+                    </div>
+                </div>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Acciones">
+            <div class="flex flex-column gap-3">
+                <div class="flex gap-3" *ngIf="infoOP.IdEstadoOrdenProduccion === 2">
+                    <p-button label="Enviar alistamiento" icon="fa-solid fa-right-long" severity="success"
+                        [raised]="true" (onClick)="onChangeEstado(3)"></p-button>
+                    <p-button label="Entregar a producción" icon="fa-solid fa-right-long" severity="success"
+                        [raised]="true" (onClick)="onChangeEstado(4)"></p-button>
+                </div>
+                <div class="flex gap-3">
+                    <p-button label="Ver bitacora" icon="fa-solid fa-file-signature" severity="info" [raised]="true"
+                        (onClick)="onGetBitacora()"></p-button>
+                    <p-button label="Agregar observación" icon="fa-solid fa-comments" severity="warning" [raised]="true"
+                        (onClick)="onOpenObservacion()"></p-button>
+                </div>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Materia Prima">
+            <p-table [value]="listMPLiberada" [loading]="loadingMPLiberada" styleClass="p-datatable-sm"
+                [scrollable]="true" scrollDirection="horizontal">
+                <ng-template pTemplate="caption">
+                    <div class="flex">
+                        <p-button
+                            *ngIf="infoOP.IdEstadoOrdenProduccion !== 1 && infoOP.IdEstadoOrdenProduccion !== 6 && infoOP.IdEstadoOrdenProduccion !== 7"
+                            label="Agregar" severity="success" icon="fa-solid fa-plus"
+                            (onClick)="onOpenMateriaPrima()"></p-button>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th class="text-center">Codigo Barras</th>
+                        <th class="text-center">Ancho (mm)</th>
+                        <th class="text-center">Largo (m)</th>
+                        <th class="text-center">Area (m2)</th>
+                        <th class="text-center">Tipo</th>
+                        <th class="text-center">Fecha</th>
+                        <th class="text-center">Usuario</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+                    <tr>
+                        <td class="text-center">
+                            {{rowIndex + 1}}
+                        </td>
+                        <td>
+                            <p-button *ngIf="onVerificarDevolucion(item)" icon="fa-solid fa-people-carry-box"
+                                severity="warning" [raised]="true" size="small" pTooltip="Devolver"
+                                tooltipPosition="right" (onClick)="onDevolverMpLiberado(item)"></p-button>
+                        </td>
+                        <td>{{item.CodigoBarras}}</td>
+                        <td class="text-right">{{item.Ancho | number: '0.0-0'}}</td>
+                        <td class="text-right">{{item.Largo | number: '0.2-2'}}</td>
+                        <td class="text-right">{{item.TotalM2 | number: '0.2-2'}}</td>
+                        <td>
+                            <p-tag severity="info" value="Liberado" *ngIf="item.TipoRegistro === 1"></p-tag>
+                            <p-tag severity="secondary" value="Devuelto" *ngIf="item.TipoRegistro === 2"></p-tag>
+                        </td>
+                        <td>{{item.FechaRegistro | date: 'dd MMMM YYYY'}}</td>
+                        <td>{{item.Usuario}}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-tabPanel>
+    </p-tabView>
+</p-dialog>
+<!--MODAL INFO BITACORA-->
+<p-sidebar [(visible)]="modalInfoBitacora" position="right" [blockScroll]="true" [modal]="true" styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>BITACORA</h5>
+    </ng-template>
+    <div class="flex">
+        <ul class="list-disc">
+            <li class="flex flex-column mt-4" *ngFor="let item of listBitacora">
+                <b>{{item.FechaRegistro | date : 'dd-MMMM-yyyy HH:mm'}}</b>
+                <b>{{item.DescripcionEstado }}</b>
+                <b>{{item.Usuario}}</b>
+                <b>{{item.Observacion}}</b>
+            </li>
+        </ul>
+    </div>
+</p-sidebar>
+<!--MODAL ADD MP-->
+<p-sidebar [(visible)]="modalAddMP" position="right" [blockScroll]="true" [modal]="true" styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>RESERVAR MATERIA PRIMA PARA OP</h5>
+    </ng-template>
+    <div class="flex flex-column gap-3 mt-2">
+        <form [formGroup]="myFormMP" class="flex flex-column gap-3" (ngSubmit)="onAddMpLiberada()">
+            <div class="flex flex-column">
+                <label for="codigoBarras" class="font-semibold">Código de barras</label>
+                <input pInputText id="codigoBarras" class="flex-auto" autocomplete="off"
+                    formControlName="codigoBarras" />
+            </div>
+        </form>
+        <p-table [value]="listNewMP" [loading]="loadingMPLiberada" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header" let-columns>
+                <tr>
+                    <th>#</th>
+                    <th>Codigo Barras</th>
+                    <th>Ancho(mm)</th>
+                    <th>Largo(m)</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+                <tr>
+                    <td class="text-center">
+                        {{rowIndex + 1}}
+                    </td>
+                    <td>{{item.CodigoBarras}}</td>
+                    <td>{{item.Ancho | number: '0.0-0'}}</td>
+                    <td>{{item.Largo | number:'0.2-2'}}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+        <div class="flex justify-content-center">
+            <p-button label="Guardar" icon="fa-solid fa-floppy-disk" [raised]="true" severity="success"
+                (onClick)="onSaveMpLiberada()"></p-button>
+        </div>
+    </div>
+</p-sidebar>
+<!--MODAL ADD OBSERVACION-->
+<p-sidebar [(visible)]="modalAddObs" position="right" [blockScroll]="true" [modal]="true" styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>AGREGAR OBSERVACIONES</h5>
+    </ng-template>
+    <div class="flex flex-column gap-3 mt-2">
+        <form [formGroup]="myFormObs" class="flex flex-column gap-3" (ngSubmit)="onSaveObservacion()">
+            <div class="flex flex-column">
+                <label for="observacion" class="font-semibold">Código de barras</label>
+                <textarea rows="5" cols="30" pInputTextarea formControlName="observacion"></textarea>
+            </div>
+            <div class="flex justify-content-center">
+                <p-button type="submit" label="Guardar" icon="fa-solid fa-floppy-disk" [raised]="true"
+                    severity="success"></p-button>
+            </div>
+        </form>
+    </div>
+</p-sidebar>

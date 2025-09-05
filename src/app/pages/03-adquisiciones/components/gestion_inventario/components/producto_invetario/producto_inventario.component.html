@@ -1,0 +1,153 @@
+<p-card header="Listado de productos de inventario">
+    <p-table #dtData [value]="listProductosInventario" [tableStyle]="{'min-width': '10rem'}"
+        [loading]="loadingProductosInventario" styleClass="p-datatable-sm"
+        [globalFilterFields]="['CodigoCatalogoSustrato','CodigoInternoSustrato','DescripcionSustrato','ValorUsd','ValorUsdMsi','Peso','RazonSocialProveedor','DescripcionLineaInventario','NombreGrupo','NombreTipoInventario','AdherenciaSustrato']"
+        [responsive]="true" [scrollable]="true" scrollDirection="horizontal" [rows]="10" [paginator]="true"
+        [rowsPerPageOptions]="[10, 20, 50, 100]">
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                <div class="flex gap-3">
+                    <p-button label="Sincronizar" icon="pi pi-sync" [loading]="loadingProductosInventario"
+                        (onClick)="ngOnInit()" />
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchProductosInventario" (input)="onGlobalFilter(dtData
+                        , $event)" placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th style="min-width:100px">Acciones</th>
+                <th style="min-width:75px" pSortableColumn="CodigoCatalogoSustrato">Id<p-sortIcon
+                        field="CodigoCatalogoSustrato" /></th>
+                <th style="min-width:100px" pSortableColumn="CodigoInternoSustrato">Código interno<p-sortIcon
+                        field="CodigoInternoSustrato" /></th>
+                <th style="min-width:500px" pSortableColumn="DescripcionSustrato">
+                    Descripción<p-sortIcon field="DescripcionSustrato" />
+                </th>
+                <th style="min-width:200px" pSortableColumn="Peso">Unidad de medida<p-sortIcon field="Peso" />
+                </th>
+                <th style="min-width:120px" pSortableColumn="Peso">Valor<p-sortIcon field="Peso" />
+                </th>
+                <th style="min-width:500px" pSortableColumn="RazonSocialProveedor">
+                    Proveedor<p-sortIcon field="RazonSocialProveedor" />
+                </th>
+                <th style="min-width:500px" pSortableColumn="DescripcionLineaInventario">
+                    Linea inventario<p-sortIcon field="DescripcionLineaInventario" />
+                </th>
+                <th style="min-width:500px" pSortableColumn="NombreGrupo">
+                    Grupo inventario<p-sortIcon field="NombreGrupo" />
+                </th>
+                <th style="min-width:500px" pSortableColumn="NombreTipoInventario">
+                    Tipo inventario<p-sortIcon field="NombreTipoInventario" />
+                </th>
+                <th style="min-width:500px" pSortableColumn="AdherenciaSustrato">
+                    Adherencia<p-sortIcon field="AdherenciaSustrato" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-producto let-columns="columns">
+            <tr>
+                <td class="flex gap-2 justify-content-center">
+                    <p-button icon="fa-solid fa-eye" [raised]="true" severity="success" pTooltip="Visualizar"
+                        tooltipPosition="bottom" (onClick)="onOpenModalView(producto)"></p-button>
+                </td>
+                <td>{{producto.CodigoCatalogoSustrato}}</td>
+                <td>{{producto.CodigoInternoSustrato}}</td>
+                <td>{{producto.DescripcionSustrato}}</td>
+                <td>{{producto.UnidadMedida}}</td>
+                <td>{{producto.Peso}}</td>
+                <td>{{producto.RazonSocialProveedor}}</td>
+                <td>{{producto.DescripcionLineaInventario}}</td>
+                <td>{{producto.NombreGrupo}}</td>
+                <td>{{producto.NombreTipoInventario}}</td>
+                <td>{{producto.AdherenciaSustrato}}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL INFORMACION-->
+<p-dialog header="Producto" [modal]="true" [(visible)]="modalInfoProducto" [style]="{ width: '50rem' }">
+    <div class="mt-2 flex flex-column gap-3">
+        <p-fieldset legend="Información">
+            <div class="flex flex-column gap-2">
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-9rem">Id</label>
+                    <b class="font-semibold  w-full text-xl">{{infoProductoInventario.CodigoCatalogoSustrato}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-9rem">Descripción</label>
+                    <b class="font-semibold w-full text-xl">{{infoProductoInventario.DescripcionSustrato}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-9rem">Linea Inventario</label>
+                    <b class="font-semibold w-full text-xl">{{infoProductoInventario.DescripcionLineaInventario}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-9rem">Grupo Inventario</label>
+                    <b class="font-semibold w-full text-xl">{{infoProductoInventario.NombreGrupo}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-9rem">Tipo Inventario</label>
+                    <b class="font-semibold w-full text-xl">{{infoProductoInventario.NombreTipoInventario}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-9rem">Proveedor</label>
+                    <b class="font-semibold w-full text-xl">{{infoProductoInventario.RazonSocialProveedor}}</b>
+                </div>
+            </div>
+        </p-fieldset>
+        <p-fieldset legend="Caracteristicas">
+            <div class="flex flex-column gap-2">
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-9rem">Unidad de medida</label>
+                    <b class="font-semibold flex-auto text-xl">{{infoProductoInventario.UnidadMedida}}</b>
+                </div>
+                <div [ngSwitch]="infoProductoInventario.CodigoLineaInventario">
+                    <div *ngSwitchCase="'MP'" class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-9rem">Valor</label>
+                        <b class="font-semibold flex-auto text-xl">{{infoProductoInventario.Peso}}</b>
+                    </div>
+                    <div *ngSwitchCase="'PA'" class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-9rem">Valor</label>
+                        <b class="font-semibold flex-auto text-xl">{{infoProductoInventario.Peso}}</b>
+                    </div>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-9rem">Precio compra</label>
+                    <b class="font-semibold flex-auto text-xl">{{infoProductoInventario.ValorUsd | currency:
+                        'USD':'symbol':'0.2-4'}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-9rem">Precio Venta</label>
+                    <b class="font-semibold flex-auto text-xl">{{infoProductoInventario.ValorUsdMsi | currency:
+                        'USD':'symbol':'0.2-4'}}</b>
+                </div>
+            </div>
+        </p-fieldset>
+        <p-fieldset *ngIf="infoProductoInventario.CodigoLineaInventario=== 'MP'" legend="Medidas">
+            <p-table [value]="listMedida" [loading]="loadingMedida" styleClass="p-datatable-sm">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Id</th>
+                        <th>Ancho milimetros</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-medida>
+                    <tr>
+                        <td>{{ medida.IdAnchoSustrato }}</td>
+                        <td>{{ medida.AnchoSustrato }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-fieldset>
+        <p-fieldset legend="Ficha técnica">
+            <div class="flex gap-3">
+                <p-button *ngIf="infoProductoInventario.Adjuntos !== null" label="Visualizar" icon="fa-solid fa-eye"
+                    [raised]="true" severity="success" (onClick)="onGetFile()"></p-button>
+            </div>
+        </p-fieldset>
+    </div>
+</p-dialog>

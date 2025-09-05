@@ -1,0 +1,504 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Listado de cotizaciones pendientes">
+    <p-table #dtData [value]="listPendientes" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingPendientes"
+        [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['NombreAsesor','RazonSocialCliente','SecuencialCotizacion']" [responsive]="true"
+        [scrollable]="true" scrollDirection="horizontal" [rows]="8" [paginator]="true">
+        <ng-template pTemplate="caption">
+            <div class="flex gap-2">
+                <div class="flex">
+                    <p-button label="Sincronizar" icon="fa-solid fa-rotate" [raised]="true" severity="primary"
+                        (onClick)="ngOnInit()"></p-button>
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData, $event)"
+                        placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th></th>
+                <th>
+                    Fecha registro
+                </th>
+                <th pSortableColumn="NombreAsesor">
+                    Asesor <p-sortIcon field="NombreAsesor" />
+                </th>
+                <th pSortableColumn="RazonSocialCliente">
+                    Cliente <p-sortIcon field="RazonSocialCliente" />
+                </th>
+                <th pSortableColumn="SecuencialCotizacion">
+                    # Cotización <p-sortIcon field="SecuencialCotizacion" />
+                </th>
+                <th pSortableColumn="DescripcionTrabajo">
+                    Trabajo <p-sortIcon field="DescripcionTrabajo" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item let-ri="rowIndex">
+            <tr>
+                <td class="flex gap-2 justify-content-center">
+                    <p-button icon="fa-solid fa-eye" severity="success" pTooltip="Visualizar" tooltipPosition="bottom"
+                        (onClick)="onGetInfoDetalleCotizacion(item.IdDetalleCotizacion)"></p-button>
+                </td>
+                <td>{{item.FechaPedido | date : 'dd-MMMM-yyyy HH:mm'}}</td>
+                <td>{{item.NombreAsesor }}</td>
+                <td>{{item.RazonSocialCliente}}</td>
+                <td>{{item.SecuencialCotizacion}}</td>
+                <td>{{item.DescripcionTrabajo}}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL VER COTIZACION-->
+<p-dialog header="Cotización" [(visible)]="modalInfoCotizacion" [modal]="true" [style]="{ width: '50rem' }">
+    <p-tabView *ngIf="infoDetalleCotizacion !== undefined">
+        <p-tabPanel header="Información">
+            <div class="flex flex-column gap-3">
+                <div class="flex gap-3">
+                    <div class="flex flex-column">
+                        <label class="">Trabajo Repetido</label>
+                        <b *ngIf="infoDetalleCotizacion.CodigoProductoTerminado !== null"
+                            class="font-bold flex-auto text-5xl text-green-500">SI</b>
+                        <b *ngIf="infoDetalleCotizacion.CodigoProductoTerminado === null"
+                            class="font-bold flex-auto text-5xl text-red-500">NO</b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Código antiguo</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.CodigoAntiguo}}</b>
+                    </div>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Unidad Trabajo</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.UnidadMedida}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Descripción del trabajo</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.DescripcionTrabajo}}</b>
+                </div>
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Avance (cm o m)</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.Avance }}</b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Ancho (cm)</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.Ancho }}</b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Nucleo</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoDetalleCotizacion.Cono}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Unidades por rollo</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.UnidadesPorRollo | number:
+                            '0.0'}}</b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Filas</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.FilasPorRollo | number:
+                            '0.0'}}</b>
+                    </div>
+                </div>
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Forma de etiqueta</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.FormatoTroquel}}</b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Prepicado</label>
+                        @if(infoDetalleCotizacion.Prepicado !== null){
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoDetalleCotizacion.Prepicado ? 'SI': 'NO' }}
+                        </b>
+                        }
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Corte seguridad</label>
+                        @if(infoDetalleCotizacion.CorteSeguridad !== null){
+                        <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.CorteSeguridad ? 'SI': 'NO'
+                            }}</b>
+                        }
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Distribuidor</label>
+                        @if(infoDetalleCotizacion.Distribuidor !== null){
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoDetalleCotizacion.Distribuidor ? 'SI': 'NO'}}
+                        </b>
+                        }
+                    </div>
+                </div>
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Tipo de corte</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoDetalleCotizacion.TipoCorte.toString().split('-')[1]}}
+                        </b>
+                    </div>
+                </div>
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Rebobinado</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoDetalleCotizacion.Rebobinado}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Cantidad a fabricas</label>
+                        <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.CantidadPorFabricar | number:
+                            '0.0'}} - {{infoDetalleCotizacion.UnidadMedida}}</b>
+                    </div>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Tipo de trabajo</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.TipoTrabajo}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Material</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.TipoInventario}}</b>
+                </div>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Acabados y colores">
+            <div class="flex flex-column gap-3">
+                <div class="flex flex-column">
+                    <label class="">Acabado</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.DescripcionAcabado}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Color 1</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.Color1}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Color 2</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.Color2}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Color 3</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.Color3}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Color 4</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.Color4}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Color 5</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.Color5}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Color 6</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.Color6}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Color 7</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.Color7}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Color 8</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoDetalleCotizacion.Color8}}</b>
+                </div>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Observaciones">
+            <form [formGroup]="myFormRechazo">
+                <div class="flex flex-column gap-3">
+                    <div class="flex flex-column">
+                        <label class="">Observaciones asesor comercial</label>
+                        <p class="font-bold flex-auto text-2xl txtObservacion">
+                            {{infoDetalleCotizacion.ObservacionTrabajo}}</p>
+                    </div>
+                    <div class="flex flex-column">
+                        <label for="observacion">Observación por rechazo</label>
+                        <textarea rows="5" cols="30" pInputTextarea formControlName="observacion"></textarea>
+                    </div>
+                </div>
+            </form>
+        </p-tabPanel>
+    </p-tabView>
+    <div class="flex justify-content-center gap-2">
+        <p-button label="Aprobar" icon="fa-solid fa-check" [raised]="true" severity="success"
+            (onClick)="onAprobarCotizacion()"></p-button>
+        <p-button label="Rechazar" icon="fa-solid fa-ban" [raised]="true" severity="danger"
+            (onClick)="onRechazarCotizacion()"></p-button>
+        <p-button label="Cerrar" icon="fa-solid fa-x" [raised]="true" severity="secondary"
+            (onClick)="modalInfoCotizacion = false"></p-button>
+    </div>
+</p-dialog>
+<!--MODAL ADD CIREL and TROQUEL-->
+<p-sidebar [(visible)]="modalAddCirelTroquel" position="right" [blockScroll]="true" [modal]="true" styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>Agregar código de cirel y troquel</h5>
+    </ng-template>
+    <div class="mt-2">
+        <form [formGroup]="myFormCirel" (ngSubmit)="onSaveProdTermiCirel()">
+            <div class="flex flex-column gap-4">
+                <div class="flex flex-column gap-1">
+                    <label class="font-semibold">Código de arte/cirel</label>
+                    <div class="flex-auto">
+                        <p-dropdown formControlName="cirel" [options]="listCirel" placeholder="Escoja una opcion"
+                            styleClass="w-full" [showClear]="true" [loading]="loadingCirel" [filter]="true"
+                            [filterFields]="['CodigoArte', 'NombreProducto']" [virtualScroll]="true"
+                            [virtualScrollItemSize]="20">
+                            <ng-template let-item pTemplate="selectedItem">
+                                <div class="custom-dropdown-item-selected">
+                                    {{ item.CodigoArte }} - {{item.NombreProducto}}
+                                </div>
+                            </ng-template>
+                            <ng-template let-item pTemplate="item">
+                                <div class="custom-dropdown-item">
+                                    {{ item.CodigoArte }} - {{item.NombreProducto}}
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                </div>
+                <div class="flex flex-column gap-1">
+                    <label class="font-semibold">Troquel</label>
+                    <div class="flex-auto">
+                        <p-dropdown formControlName="troquel" [options]="listTroquel" placeholder="Escoja una opcion"
+                            styleClass="w-full" [showClear]="true" [loading]="loadingTroquel" [filter]="true"
+                            [filterFields]="['DescripcionTroquel']" [virtualScroll]="true" [virtualScrollItemSize]="20">
+                            <ng-template let-item pTemplate="selectedItem">
+                                <div class="custom-dropdown-item-selected">
+                                    {{ item.DescripcionTroquel }}
+                                </div>
+                            </ng-template>
+                            <ng-template let-item pTemplate="item">
+                                <div class="custom-dropdown-item">
+                                    {{ item.DescripcionTroquel }}
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                </div>
+                <div class="flex flex-column gap-1">
+                    <label for="referencia" class="font-semibold">Referencia extra</label>
+                    <input pInputText id="referencia" class="flex-auto" autocomplete="off"
+                        formControlName="referencia" />
+                </div>
+                <div class="flex justify-content-center gap-2">
+                    <p-button label="Guardar" severity="success" type="submit" />
+                    <p-button label="Cerrar" severity="secondary" (onClick)="modalAddCirelTroquel = false" />
+                </div>
+            </div>
+        </form>
+    </div>
+</p-sidebar>
+<!--MODAL ADD TROQUEL-->
+<p-sidebar [(visible)]="modalAddTroquel" position="right" [blockScroll]="true" [modal]="true" styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>Agregar código de troquel</h5>
+    </ng-template>
+    <div class="mt-2">
+        <form [formGroup]="myFormTroquel" (ngSubmit)="onSaveProdTermiTroquel()">
+            <div class="flex flex-column gap-4">
+                <div class="flex flex-column gap-1">
+                    <label class="font-semibold">Troquel</label>
+                    <div class="flex-auto">
+                        <p-dropdown formControlName="troquel" [options]="listTroquel" placeholder="Escoja una opcion"
+                            styleClass="w-full" [showClear]="true" [loading]="loadingTroquel" [filter]="true"
+                            [filterFields]="['DescripcionTroquel']" [virtualScroll]="true" [virtualScrollItemSize]="20">
+                            <ng-template let-item pTemplate="selectedItem">
+                                <div class="custom-dropdown-item-selected">
+                                    {{ item.DescripcionTroquel }}
+                                </div>
+                            </ng-template>
+                            <ng-template let-item pTemplate="item">
+                                <div class="custom-dropdown-item">
+                                    {{ item.DescripcionTroquel }}
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                </div>
+                <div class="flex flex-column gap-1">
+                    <label for="referencia" class="font-semibold">Referencia extra</label>
+                    <input pInputText id="referencia" class="flex-auto" autocomplete="off"
+                        formControlName="referencia" />
+                </div>
+                <div class="flex justify-content-center gap-2">
+                    <p-button label="Guardar" severity="success" type="submit" />
+                    <p-button label="Cerrar" severity="secondary" (onClick)="modalAddCirelTroquel = false" />
+                </div>
+            </div>
+        </form>
+    </div>
+</p-sidebar>
+<!--MODAL PROCESO FABRICACION-->
+<p-dialog header="Procesos de fabricación" [(visible)]="modalInfoProcFabr" [modal]="true" styleClass="w-50rem">
+    <div class="flex flex-column gap-2" *ngIf="infoProdTerm">
+        <div class="flex flex-column">
+            <label class="">Nombre del producto</label>
+            <b class="font-bold flex-auto text-2xl">{{infoProdTerm.NombreProductoEtimet}}</b>
+        </div>
+        <div class="flex flex-column">
+            <label class="">Código del producto</label>
+            <b class="font-bold flex-auto text-2xl">{{infoProdTerm.CodigoFinalProductoTerminado}}</b>
+        </div>
+        <div class="flex flex-column">
+            <label class="">Material</label>
+            <b class="font-bold flex-auto text-2xl">{{infoProdTerm.CodigoMaterial}}</b>
+        </div>
+        <hr>
+        <div class="flex">
+            <p-button label="Agregar" icon="fa-solid fa-plus" [raised]="true" severity="primary"
+                (onClick)="onCreateProcFabr()"></p-button>
+        </div>
+        <hr>
+        <div class="flex">
+            <b class="font-bold flex-auto text-2xl">Seleccionar un proceso de fabricaciónl</b>
+        </div>
+        <form class="flex flex-column gap-2" [formGroup]="myFormProcFabr" (ngSubmit)="onCreateOrdenProduccion()">
+            <div *ngFor="let item of listProcFabr" class="field-checkbox">
+                <p-radioButton [inputId]="item.IdProcesoFabricacion.toString()" [value]="item"
+                    formControlName="proceso" />
+                <label [for]="item.IdProcesoFabricacion" class="ml-2">
+                    {{item.AnchoMaterial}}mm - {{item.NombreMaterial}} - {{ item.NombreMaquina1 }} - {{
+                    item.NombreMaquina2 }} - {{
+                    item.NombreMaquina3 }} - {{
+                    item.NombreMaquina4 }}
+                </label>
+            </div>
+            <div class="flex justify-content-center">
+                <p-button label="Procesar" icon="fa-solid fa-floppy-disk" [raised]="true" severity="success"
+                    type="submit"></p-button>
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL ADD PROCESO FABRICACION-->
+<p-sidebar [(visible)]="modalAddProcFabr" position="right" [blockScroll]="true" [modal]="true" styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>Agregar proceso de fabricación</h5>
+    </ng-template>
+    <div class="mt-2">
+        <form [formGroup]="myFormAddProcFabr" (ngSubmit)="onSaveProcFabr()">
+            <div class="flex flex-column gap-4">
+                <div class="flex flex-column gap-1">
+                    <label class="font-semibold">Materia Prima</label>
+                    <div class="flex-auto">
+                        <p-dropdown formControlName="materiaPrima" [options]="listProductoInventario"
+                            placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                            [loading]="loadingMaquina" [filter]="true" [filterFields]="['CodigoInternoSustrato']"
+                            [virtualScroll]="true" [virtualScrollItemSize]="20">
+                            <ng-template let-item pTemplate="selectedItem">
+                                <div class="custom-dropdown-item">
+                                    {{ item.CodigoInternoSustrato }} - {{item.DescripcionSustrato}}
+                                </div>
+                            </ng-template>
+                            <ng-template let-item pTemplate="item">
+                                <div class="custom-dropdown-item-selected">
+                                    <div>
+                                        {{ item.CodigoInternoSustrato }}
+                                    </div>
+                                    <div>
+                                        {{item.DescripcionSustrato}}
+                                    </div>
+                                    <div>
+                                        {{item.NombreTipoInventario}}
+                                    </div>
+                                    <div>
+                                        {{item.RazonSocialProveedor}}
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                </div>
+                <div class="flex flex-column gap-1">
+                    <label for="ancho" class="font-semibold w-10rem">Ancho (mm)</label>
+                    <div class="flex-auto">
+                        <p-inputNumber formControlName="ancho" id="ancho" [minFractionDigits]="2" mode="decimal"
+                            locale="es-EC" currency="USD" [min]="0" styleClass="w-10rem" />
+                    </div>
+                </div>
+                <div class="flex flex-column gap-1">
+                    <label class="font-semibold">Maquina 1</label>
+                    <div class="flex-auto">
+                        <p-dropdown formControlName="maquina1" [options]="listMaquina" placeholder="Escoja una opcion"
+                            styleClass="w-full" [showClear]="true" [loading]="loadingMaquina" [filter]="true"
+                            [filterFields]="['Nombre']" [virtualScroll]="true" [virtualScrollItemSize]="20">
+                            <ng-template let-item pTemplate="selectedItem">
+                                <div class="custom-dropdown-item-selected">
+                                    {{ item.Nombre }}
+                                </div>
+                            </ng-template>
+                            <ng-template let-item pTemplate="item">
+                                <div class="custom-dropdown-item">
+                                    {{ item.Nombre }}
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                </div>
+                <div class="flex flex-column gap-1">
+                    <label class="font-semibold">Maquina 2</label>
+                    <div class="flex-auto">
+                        <p-dropdown formControlName="maquina2" [options]="listMaquina" placeholder="Escoja una opcion"
+                            styleClass="w-full" [showClear]="true" [loading]="loadingMaquina" [filter]="true"
+                            [filterFields]="['Nombre']" [virtualScroll]="true" [virtualScrollItemSize]="20">
+                            <ng-template let-item pTemplate="selectedItem">
+                                <div class="custom-dropdown-item-selected">
+                                    {{ item.Nombre }}
+                                </div>
+                            </ng-template>
+                            <ng-template let-item pTemplate="item">
+                                <div class="custom-dropdown-item">
+                                    {{ item.Nombre }}
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                </div>
+                <div class="flex flex-column gap-1">
+                    <label class="font-semibold">Maquina 3</label>
+                    <div class="flex-auto">
+                        <p-dropdown formControlName="maquina3" [options]="listMaquina" placeholder="Escoja una opcion"
+                            styleClass="w-full" [showClear]="true" [loading]="loadingMaquina" [filter]="true"
+                            [filterFields]="['Nombre']" [virtualScroll]="true" [virtualScrollItemSize]="20">
+                            <ng-template let-item pTemplate="selectedItem">
+                                <div class="custom-dropdown-item-selected">
+                                    {{ item.Nombre }}
+                                </div>
+                            </ng-template>
+                            <ng-template let-item pTemplate="item">
+                                <div class="custom-dropdown-item">
+                                    {{ item.Nombre }}
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                </div>
+                <div class="flex flex-column gap-1">
+                    <label class="font-semibold">Maquina 4</label>
+                    <div class="flex-auto">
+                        <p-dropdown formControlName="maquina4" [options]="listMaquina" placeholder="Escoja una opcion"
+                            styleClass="w-full" [showClear]="true" [loading]="loadingMaquina" [filter]="true"
+                            [filterFields]="['Nombre']" [virtualScroll]="true" [virtualScrollItemSize]="20">
+                            <ng-template let-item pTemplate="selectedItem">
+                                <div class="custom-dropdown-item-selected">
+                                    {{ item.Nombre }}
+                                </div>
+                            </ng-template>
+                            <ng-template let-item pTemplate="item">
+                                <div class="custom-dropdown-item">
+                                    {{ item.Nombre }}
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                </div>
+                <div class="flex justify-content-center gap-2">
+                    <p-button label="Guardar" severity="success" type="submit" />
+                    <p-button label="Cerrar" severity="secondary" (onClick)="modalAddProcFabr = false" />
+                </div>
+            </div>
+        </form>
+    </div>
+</p-sidebar>

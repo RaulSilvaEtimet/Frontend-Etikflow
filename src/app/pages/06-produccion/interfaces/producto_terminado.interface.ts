@@ -1,0 +1,36 @@
+export interface ProduccionProductoTerminadoInterface {
+    AnchoEtiqueta: number;
+    AvanceEtiqueta: number;
+    CodigoEspecificacionTipoBFD: string;
+    CodigoFinalProductoTerminado: string;
+    CodigoMaterial: string;
+    CodigoProductoTerminado: string;
+    CodigoProductoTerminadoAnterior: string;
+    ConfigurarOp: boolean;
+    Cono: string;
+    DescripcionAcabado: string;
+    EspecificacionTipoBFD: string;
+    Estado: boolean;
+    FechaRegistro: Date;
+    FilasPorRollo: number;
+    Gapancho: number;
+    GapAvance: number;
+    IdProductoTerminado: number;
+    M2Etiqueta: number;
+    M2EtiquetaConGap: number;
+    NombreProductoComercial: string;
+    NombreProductoEtimet: string;
+    Rebobinado: string;
+    SecuencialProductoTerminado: number;
+    TipoCorte: string;
+    TipoInventario: string;
+    TipoTrabajo: string;
+    Troquel: string;
+    UnidadesPorRollo: number;
+    UnidadMedida: string;
+    CodigoAntiguo: string;
+    FormatoTroquel: string;
+    Prepicado: boolean;
+    CorteSeguridad: boolean;
+    Distribuidor: boolean;
+}

@@ -1,0 +1,118 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Listado de cotizaciones">
+    <p-table #dtData [value]="listCotizaciones" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingCotizaciones"
+        [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['IdCabeceraCotizacion','FechaRegistro','RazonSocialCliente','SecuencialCotizacion','ValorTotalCotizacion','Estado']"
+        [responsive]="true" [scrollable]="true" scrollDirection="horizontal" [rows]="8" [paginator]="true">
+        <ng-template pTemplate="caption">
+            <div class="flex gap-2">
+                <form [formGroup]="myFormSearch" class="flex gap-2" (ngSubmit)="onSearchCotizacion()">
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold">Fecha Inicio</label>
+                        <div class="flex-auto">
+                            <p-calendar styleClass="w-full" formControlName="fechaIni" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="" class="font-semibold">Fecha Fin</label>
+                        <div class="flex-auto">
+                            <p-calendar styleClass="w-full" formControlName="fechaFin" />
+                        </div>
+                    </div>
+                    <div class="flex justify-content-center">
+                        <p-button label="Buscar" icon="fa-solid fa-magnifying-glass" severity="primary"
+                            [loading]="loadingCotizaciones" type="submit"></p-button>
+                    </div>
+                </form>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData, $event)"
+                        placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="IdCabeceraCotizacion">
+                    Id <p-sortIcon field="IdCabeceraCotizacion" />
+                </th>
+                <th pSortableColumn="FechaRegistro">
+                    Creación <p-sortIcon field="FechaRegistro" />
+                </th>
+                <th pSortableColumn="RazonSocialCliente">
+                    Cliente <p-sortIcon field="RazonSocialCliente" />
+                </th>
+                <th pSortableColumn="SecuencialCotizacion">
+                    # Cotización <p-sortIcon field="SecuencialCotizacion" />
+                </th>
+                <th pSortableColumn="ValorTotalCotizacion">
+                    Valor <p-sortIcon field="ValorTotalCotizacion" />
+                </th>
+                <th pSortableColumn="Estado">
+                    Estado <p-sortIcon field="Estado" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-cotizacion let-columns="columns">
+            <tr>
+                <td class="flex gap-2 justify-content-center">
+                    <p-button [link]="true" [label]="cotizacion.IdCabeceraCotizacion" pTooltip="Visualizar"
+                        tooltipPosition="bottom" (onClick)="onGetInfoCotizacion(cotizacion)"></p-button>
+                </td>
+                <td>{{cotizacion.FechaRegistro | date : 'dd-MMMM-yyyy HH:mm'}}</td>
+                <td>{{cotizacion.RazonSocialCliente}}</td>
+                <td>{{cotizacion.SecuencialCotizacion}}</td>
+                <td>{{cotizacion.ValorTotalCotizacion | currency : 'USD': 'symbol': '0.2-4'}}</td>
+                <td>
+                    <p-tag [value]="cotizacion.DescripcionEstadoCabeceraCotizacion" severity="secondary"
+                        *ngIf="cotizacion.Estado === 1"></p-tag>
+                    <p-tag [value]="cotizacion.DescripcionEstadoCabeceraCotizacion" severity="info"
+                        *ngIf="cotizacion.Estado === 2"></p-tag>
+                    <p-tag [value]="cotizacion.DescripcionEstadoCabeceraCotizacion" severity="success"
+                        *ngIf="cotizacion.Estado === 3"></p-tag>
+                    <p-tag [value]="cotizacion.DescripcionEstadoCabeceraCotizacion" severity="warning"
+                        *ngIf="cotizacion.Estado === 4"></p-tag>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL VER COTIZACION-->
+<p-dialog header="Cotización" [(visible)]="modalInfoCotizacion" [modal]="true" [style]="{ width: '50rem' }"
+    [scrollTop]="true" [maximizable]="true">
+    <div class="flex flex-column gap-3 mt-2" *ngIf="infoCabeceraCotizacion !== undefined">
+        <div class="flex flex-column">
+            <label class="font-semibold w-9rem">Cliente</label>
+            <b class="font-semibold flex-auto text-xl">{{infoCabeceraCotizacion!.RazonSocialCliente}}</b>
+        </div>
+        <hr>
+        <p-table [value]="listDetalleCotizacion" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Num</th>
+                    <th>Descricpion</th>
+                    <th>Estado</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item let-ri="rowIndex">
+                <tr>
+                    <td>{{ (ri+1) }}</td>
+                    <td>{{ item.DescripcionTrabajo }}</td>
+                    <td>
+                        <p-tag [value]="item.DescripcionDetalleCotizacion" severity="secondary"
+                            *ngIf="item.Estado === 1"></p-tag>
+                        <p-tag [value]="item.DescripcionDetalleCotizacion" severity="success"
+                            *ngIf="item.Estado === 2"></p-tag>
+                        <p-tag [value]="item.DescripcionDetalleCotizacion" severity="danger"
+                            *ngIf="item.Estado === 3"></p-tag>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+        <div class="flex justify-content-center gap-2">
+            <p-button label="Cerrar" icon="fa-solid fa-x" [raised]="true" severity="secondary"
+                (onClick)="modalInfoCotizacion = false"></p-button>
+        </div>
+    </div>
+</p-dialog>

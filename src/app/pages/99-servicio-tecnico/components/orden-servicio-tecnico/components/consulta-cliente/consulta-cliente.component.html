@@ -1,0 +1,12 @@
+<p-fieldset legend="Nombre del cliente">
+    <form action="">
+        <div class="field">
+            <p-dropdown [options]="countries" [filter]="true" filterBy="name" optionLabel="name"
+                placeholder="Select a City" class="w-6" />
+        </div>
+        <div class="flex gap-2">
+            <p-button label="Buscar" icon="pi pi-search" [rounded]="true" severity="success" />
+            <p-button label="Limpiar" icon="pi pi-trash" [rounded]="true" severity="info" />
+        </div>
+    </form>
+</p-fieldset>

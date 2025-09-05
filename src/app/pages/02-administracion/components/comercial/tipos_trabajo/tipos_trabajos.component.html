@@ -1,0 +1,223 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSendData"></app-blocked-send-info-database>
+<p-card header="Listado de tipos de trabajo">
+    <div class="flex gap-2 flex-column">
+        <p-table #dtData [value]="listTipoTrabajo" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingTipoTrabajo"
+            [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+            [globalFilterFields]="['IdTipoTrabajo','DescripcionTrabajo','AnchoCilindroMm']">
+            <ng-template pTemplate="caption">
+                <div class="flex">
+                    <div class="flex gap-3">
+                        <p-button label="Agregar" severity="success" icon="fa-solid fa-plus"
+                            (onClick)="onCreateTipoTrabajo()" [raised]="true"></p-button>
+                        <p-button label="Sincronizar" icon="pi pi-sync" [loading]="loadingTipoTrabajo"
+                            (onClick)="ngOnInit()" [raised]="true"></p-button>
+                    </div>
+                    <span class="p-input-icon-left ml-auto">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" [(ngModel)]="searchTipoTrabajo" (input)="onGlobalFilter(dtData
+                            , $event)" placeholder="Filtrar..." />
+                    </span>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="IdTipoTrabajo">
+                        Id<p-sortIcon field="IdTipoTrabajo" />
+                    </th>
+                    <th pSortableColumn="DescripcionTrabajo">
+                        Descripción<p-sortIcon field="DescripcionTrabajo" />
+                    </th>
+                    <th pSortableColumn="TrabajoImpreso">
+                        Impreso<p-sortIcon field="TrabajoImpreso" />
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-tipoTrabajo>
+                <tr>
+                    <td>
+                        <p-button [label]="tipoTrabajo.IdTipoTrabajo" [link]="true"
+                            (onClick)="onGetInfoTipoTrabajo(tipoTrabajo)"></p-button>
+                    </td>
+                    <td>{{tipoTrabajo.DescripcionTrabajo }}</td>
+                    <td>
+                        <p-tag *ngIf="tipoTrabajo.TrabajoImpreso" value="Si" severity="success" />
+                        <p-tag *ngIf="!tipoTrabajo.TrabajoImpreso" value="No" severity="danger" />
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</p-card>
+<!--MODAL CREACION TIPO TRABAJO-->
+<p-dialog [header]="idTipoTrabajo === 0 ? 'Crear tipo de trabajo':'Editar tipo de trabajo'" [modal]="true"
+    [(visible)]="modalCreateTipoTrabajo" [style]="{ width: '30rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-3" [formGroup]="myFormTipoTrabajo" (ngSubmit)="onSaveTipoTrabajo()">
+            <div class="flex align-items-center gap-3">
+                <label for="descripcion" class="font-semibold w-11rem">Descripción</label>
+                <input pInputText id="descripcion" class="flex-auto" autocomplete="off" formControlName="descripcion" />
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="" class=" font-semibold w-11rem">Trabajo Impreso</label>
+                <div class="flex flex-wrap gap-3 align-items-center">
+                    <div class=" flex align-items-center">
+                        <p-radioButton [value]="true" inputId="radiobtn1" formControlName="impreso" />
+                        <label for="radiobtn1" class="ml-2">Si</label>
+                    </div>
+                    <div class="flex align-items-center">
+                        <p-radioButton [value]="false" inputId="radiobtn2" formControlName="impreso" />
+                        <label for="radiobtn2" class="ml-2">No</label>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalCreateTipoTrabajo = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL INFO TIPO TRABAJO-->
+<p-dialog header="Tipo de trabajo" [modal]="true" [(visible)]="modalInfoTipoTrabajo" [style]="{ width: '55rem' }">
+    <div class="mt-2">
+        <div class="flex flex-column gap-3">
+            <div class="flex align-items-center gap-3">
+                <label class="font-semibold w-7rem">Descripcion</label>
+                <b class="font-semibold flex-auto text-xl">{{infoTipoTrabajo.DescripcionTrabajo}}</b>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label class="font-semibold w-7rem">Impresa</label>
+                <b class="font-semibold flex-auto text-xl">
+                    <p-tag *ngIf="infoTipoTrabajo.TrabajoImpreso" value="Si" severity="success" />
+                    <p-tag *ngIf="!infoTipoTrabajo.TrabajoImpreso" value="No" severity="danger" />
+                </b>
+            </div>
+            <p-table #dtTT [value]="listTipTraTipInv" [tableStyle]="{'min-width': '50rem'}"
+                [loading]="loadingTipTraTipInv" [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+                [globalFilterFields]="['Codigo','NombreTipoInventario','NombreGrupo','ValorVentaMPm2']">
+                <ng-template pTemplate="caption">
+                    <div class="flex">
+                        <p-button label="Agregar" severity="success" icon="fa-solid fa-plus"
+                            (onClick)="onCreateTipTraTipInv()" [raised]="true"></p-button>
+                        <span class="p-input-icon-left ml-auto">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text" [(ngModel)]="searchTipTraTipInv" (input)="onGlobalFilter(dtTT
+                            , $event)" placeholder="Filtrar..." />
+                        </span>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th pSortableColumn="Codigo">
+                            Código<p-sortIcon field="Codigo" />
+                        </th>
+                        <th pSortableColumn="NombreTipoInventario">
+                            Tipo Inventario<p-sortIcon field="NombreTipoInventario" />
+                        </th>
+                        <th pSortableColumn="NombreGrupo">
+                            Grupo Inventaio<p-sortIcon field="NombreGrupo" />
+                        </th>
+                        <th pSortableColumn="ValorVentaMPm2">
+                            Precio de venta<p-sortIcon field="ValorVentaMPm2" />
+                        </th>
+                        <th>Eliminar</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-tipInv>
+                    <tr>
+                        <td>{{tipInv.Codigo }}</td>
+                        <td>{{tipInv.NombreTipoInventario }}</td>
+                        <td>{{tipInv.NombreGrupo }}</td>
+                        <td>{{tipInv.ValorVentaMPm2 | currency: 'USD': 'symbol': '0.2-4' }}</td>
+                        <td class="flex gap-2">
+                            <p-button icon="fa-solid fa-pencil" severity="success" [raised]="true"
+                                (onClick)="onEditTipTraTipInv(tipInv)"></p-button>
+                            <p-button icon="fa-solid fa-trash" severity="danger" [raised]="true"
+                                (onClick)="onDeleteTipTraTipInv(tipInv)"></p-button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</p-dialog>
+<!--MODAL INSERT TIPO INVENTARIO-->
+<p-sidebar [(visible)]="modalInsertTipTraTipInv" position="right" [blockScroll]="true" [modal]="true"
+    styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>Tipo Inventario</h5>
+    </ng-template>
+    <form class="flex align-content-center flex-column gap-5" [formGroup]="myFormInsertTipTraTipInv"
+        (ngSubmit)="onInsertTipTraTipInv()">
+        <div class="flex flex-column gap-1">
+            <label for="grupoInventario" class="font-semibold">Grupo inventario</label>
+            <div class="flex-auto">
+                <p-dropdown formControlName="grupoInventario" id="grupoInventario" [options]="listGrupoInventario"
+                    placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                    [filterFields]="['NombreGrupo', 'GrupoInventario']" [showClear]="true"
+                    [loading]="loadingGrupoInventario" filterPlaceholder="Buscando..."
+                    (ngModelChange)="onChangeGrupoInventario($event)" [virtualScroll]="true"
+                    [virtualScrollItemSize]="20">
+                    <ng-template let-GI pTemplate="selectedItem">
+                        <div class="custom-dropdown-item-selected">
+                            {{ GI.GrupoInventario }} - {{GI.NombreGrupo}}
+                        </div>
+                    </ng-template>
+                    <ng-template let-GI pTemplate="item">
+                        <div class="custom-dropdown-item">
+                            {{ GI.GrupoInventario }} - {{GI.NombreGrupo}}
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+            </div>
+        </div>
+        <div class="flex flex-column gap-1">
+            <label for="tipoInventario" class="font-semibold">Tipo de Inventario</label>
+            <div class="flex-auto">
+                <p-dropdown formControlName="tipoInventario" id="tipoInventario" [options]="listTipoInventario"
+                    placeholder="Escoja una opcion" styleClass="w-full" [loading]="loadingTipoInventario"
+                    [filter]="true" [filterFields]="['CodigoTipoInventario', 'NombreTipoInventario']" [showClear]="true"
+                    filterPlaceholder="Buscando..." [virtualScroll]="true" [virtualScrollItemSize]="20">
+                    <ng-template let-TI pTemplate="selectedItem">
+                        <div class="custom-dropdown-item-selected">
+                            {{ TI.CodigoTipoInventario }} - {{TI.NombreTipoInventario}}
+                        </div>
+                    </ng-template>
+                    <ng-template let-TM pTemplate="item">
+                        <div class="custom-dropdown-item">
+                            {{ TM.CodigoTipoInventario }} - {{TM.NombreTipoInventario}}
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+            </div>
+        </div>
+        <div class="flex flex-column gap-1">
+            <label for="precio" class="font-semibold">Precio venta</label>
+            <p-inputNumber formControlName="precio" id="precio" [minFractionDigits]="2" mode="decimal" locale="en-US"
+                currency="USD" [min]="0" />
+        </div>
+        <div class="flex justify-content-end gap-2">
+            <p-button label="Guardar" severity="success" type="submit" />
+            <p-button label="Cerrar" severity="secondary" (onClick)="modalInsertTipTraTipInv = false" />
+        </div>
+    </form>
+</p-sidebar>
+<!--MODAL EDIT TIPO INVENTARIO-->
+<p-sidebar [(visible)]="modalUpdateTipTraTipInv" position="right" [blockScroll]="true" [modal]="true"
+    styleClass="w-30rem">
+    <ng-template pTemplate="header">
+        <h5>Tipo Inventario</h5>
+    </ng-template>
+    <form class="flex align-content-center flex-column gap-5" [formGroup]="myFormUpdateTipTraTipInv"
+        (ngSubmit)="onUpdateTipTraTipInv()">
+        <div class="flex flex-column gap-1">
+            <label for="precio" class="font-semibold">Precio venta</label>
+            <p-inputNumber formControlName="precio" id="precio" [minFractionDigits]="2" mode="decimal" locale="en-US"
+                currency="USD" [min]="0" />
+        </div>
+        <div class="flex justify-content-end gap-2">
+            <p-button label="Guardar" severity="success" type="submit" />
+            <p-button label="Cerrar" severity="secondary" (onClick)="modalInsertTipTraTipInv = false" />
+        </div>
+    </form>
+</p-sidebar>

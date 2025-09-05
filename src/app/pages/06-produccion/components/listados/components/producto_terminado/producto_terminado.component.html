@@ -1,0 +1,224 @@
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Listado de productos terminado">
+    <p-table #dtData [value]="listProdTerm" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingProdTerm"
+        [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['CodigoFinalProductoTerminado','NombreProductoEtimet','TipoInventario','TipoTrabajo','AvanceEtiqueta','AnchoEtiqueta']"
+        [responsive]="true" [scrollable]="true" scrollDirection="horizontal" [rows]="10" [paginator]="true"
+        [rowsPerPageOptions]="[10,20,50,100]">
+        <ng-template pTemplate="caption">
+            <div class="flex gap-2">
+                <p-button label="Sincronizar" icon="fa-solid fa-rotate" severity="primary" [raised]="true"
+                    (onClick)="ngOnInit()"></p-button>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData, $event)"
+                        placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="CodigoFinalProductoTerminado">
+                    Código <p-sortIcon field="CodigoFinalProductoTerminado" />
+                </th>
+                <th pSortableColumn="NombreProductoEtimet">
+                    Nombre <p-sortIcon field="NombreProductoEtimet" />
+                </th>
+                <th pSortableColumn="TipoInventario">
+                    Material <p-sortIcon field="TipoInventario" />
+                </th>
+                <th pSortableColumn="TipoTrabajo">
+                    Tipo trabajo <p-sortIcon field="TipoTrabajo" />
+                </th>
+                <th pSortableColumn="AvanceEtiqueta">
+                    Avance <p-sortIcon field="AvanceEtiqueta" />
+                </th>
+                <th pSortableColumn="AnchoEtiqueta">
+                    Ancho <p-sortIcon field="AnchoEtiqueta" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item let-columns="columns">
+            <tr>
+                <td class="flex gap-2 justify-content-center">
+                    <p-button [link]="true" [label]="item.CodigoFinalProductoTerminado" pTooltip="Visualizar"
+                        tooltipPosition="bottom" (onClick)="onOpenInfoProdTerm(item)"></p-button>
+                </td>
+                <td>{{item.NombreProductoEtimet}}</td>
+                <td>{{item.TipoInventario}}</td>
+                <td>{{item.TipoTrabajo}}</td>
+                <td>{{item.AvanceEtiqueta | number: '0.2-4'}}</td>
+                <td>{{item.AnchoEtiqueta | number: '0.2-4'}}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL VER COTIZACION-->
+<p-dialog header="Producto Terminado" [(visible)]="modalInfoProdTerm" [modal]="true" [style]="{ width: '60rem' }"
+    [scrollTop]="true" [maximizable]="true">
+    <div class="flex flex-column gap-3 mt-2" *ngIf="infoProdTerm !== undefined">
+        <div class="flex flex-column gap-3">
+            <div class="flex justify-content-between">
+                <div class="flex flex-column">
+                    <label class="">Código de producto terminado</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoProdTerm.CodigoFinalProductoTerminado}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Código antiguo</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoProdTerm.CodigoAntiguo}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Fecha de creación</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoProdTerm.FechaRegistro | date: 'dd MMMM YYYY'}}</b>
+                </div>
+            </div>
+            <div class="flex flex-column">
+                <label class="">Nombre del producto</label>
+                <b class="font-bold flex-auto text-2xl">{{infoProdTerm.NombreProductoEtimet}}</b>
+            </div>
+            <div class="flex justify-content-between">
+                <div class="flex flex-column">
+                    <label class="">Avance (cm o m)</label>
+                    <b class="font-bold flex-auto text-2xl">
+                        {{infoProdTerm.AvanceEtiqueta | number: '0.0-2'}}
+                    </b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Ancho (cm)</label>
+                    <b class="font-bold flex-auto text-2xl">
+                        {{infoProdTerm.AnchoEtiqueta | number: '0.0-2'}}
+                    </b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Nucleo</label>
+                    <b class="font-bold flex-auto text-2xl">{{infoProdTerm.Cono}}</b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Unidades por rollo</label>
+                    <b class="font-bold flex-auto text-2xl">
+                        {{infoProdTerm.UnidadesPorRollo | number : '0.0-0'}}
+                    </b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Filas</label>
+                    <b class="font-bold flex-auto text-2xl">
+                        {{infoProdTerm.FilasPorRollo | number: '0.0-0'}}
+                    </b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Rebobinado</label>
+                    <b class="font-bold flex-auto text-2xl">
+                        {{infoProdTerm.Rebobinado}}
+                    </b>
+                </div>
+            </div>
+            <div class="flex justify-content-between">
+                <div class="flex flex-column">
+                    <label class="">Tipo de corte</label>
+                    <b class="font-bold flex-auto text-2xl">
+                        {{infoProdTerm.TipoCorte}}
+                    </b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Troquel</label>
+                    <b class="font-bold flex-auto text-2xl">
+                        {{infoProdTerm.Troquel}}
+                    </b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Gap Avance (mm)</label>
+                    <b class="font-bold flex-auto text-2xl">
+                        {{infoProdTerm.GapAvance}}
+                    </b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Gap Ancho (mm)</label>
+                    <b class="font-bold flex-auto text-2xl">
+                        {{infoProdTerm.Gapancho}}
+                    </b>
+                </div>
+            </div>
+            <div class="flex justify-content-between">
+                <div class="flex flex-column">
+                    <label class="">Tipo de inventario</label>
+                    <b class="font-bold flex-auto text-2xl">
+                        {{infoProdTerm.TipoInventario}}
+                    </b>
+                </div>
+                <div class="flex flex-column">
+                    <label class="">Tipo de trabajo</label>
+                    <b class="font-bold flex-auto text-2xl">
+                        {{infoProdTerm.TipoTrabajo}}
+                    </b>
+                </div>
+            </div>
+            <div class="flex flex-column gap-3"
+                *ngIf="infoProdTerm.EspecificacionTipoBFD === 'D' && infoCirel !== undefined">
+                <div class="flex">
+                    <div class="flex flex-column">
+                        <label class="">Código arte</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoCirel.CodigoArte}}
+                        </b>
+                    </div>
+                </div>
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Color 1</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoCirel.Color1}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Color 2</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoCirel.Color2}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Color 3</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoCirel.Color3}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Color 4</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoCirel.Color4}}
+                        </b>
+                    </div>
+                </div>
+                <div class="flex justify-content-between">
+                    <div class="flex flex-column">
+                        <label class="">Color 5</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoCirel.Color5}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Color 6</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoCirel.Color6}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Color 7</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoCirel.Color7}}
+                        </b>
+                    </div>
+                    <div class="flex flex-column">
+                        <label class="">Color 8</label>
+                        <b class="font-bold flex-auto text-2xl">
+                            {{infoCirel.Color8}}
+                        </b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-content-center gap-2">
+            <p-button label="Cerrar" icon="fa-solid fa-x" [raised]="true" severity="secondary"
+                (onClick)="modalInfoProdTerm = false"></p-button>
+        </div>
+    </div>
+</p-dialog>

@@ -1,0 +1,283 @@
+<form action="" class="flex flex-column gap-3">
+    <p-fieldset legend="Información requerida">
+        <div class="grid">
+            <div class="col">
+                <div class="field grid mb-0">
+                    <label htmlfor="name3" class="col-12 mb-2 md:col-2 md:mb-0">Cliente</label>
+                    <div class="col-12 md:col-10">
+                        <input pInputText id="lastname5" type="text" class="w-full">
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="field grid mb-0">
+                    <label htmlfor="name3" class="col-12 mb-2 md:col-2 md:mb-0">Fecha</label>
+                    <div class="col-12 md:col-10">
+                        <input pInputText id="lastname5" type="text" class="w-full">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid">
+            <div class="col">
+                <div class="field grid mb-0">
+                    <label htmlfor="name3" class="col-12 mb-2 md:col-3 md:mb-0">Contacto</label>
+                    <div class="col-12 md:col-9">
+                        <input pInputText id="lastname5" type="text" class="w-full">
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="field grid mb-0">
+                    <label htmlfor="name3" class="col-12 mb-2 md:col-3 md:mb-0">Hora inicio</label>
+                    <div class="col-12 md:col-9">
+                        <p-calendar inputId="calendar-timeonly" [timeOnly]="true" class="w-full"></p-calendar>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="field grid mb-0">
+                    <label htmlfor="name3" class="col-12 mb-2 md:col-3 md:mb-0">Hora fin</label>
+                    <div class="col-12 md:col-9">
+                        <p-calendar inputId="calendar-timeonly" [timeOnly]="true" class="w-full"></p-calendar>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p-fieldset>
+    <p-fieldset legend="Información de equipos">
+        <p-table [value]="arrayEquipos" editMode="row" styleClass="p-datatable-sm">
+            <ng-template pTemplate="caption">
+                <div class="flex">
+                    <p-button label="Agregar" [rounded]="true" icon="pi pi-plus" severity="success"
+                        (click)="onAddEquipos()" />
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Modelo</th>
+                    <th>Marca</th>
+                    <th>Numero de serie</th>
+                    <th>Ubicacion</th>
+                    <th>Pg lineales Recividos</th>
+                    <th>Pg lineales Entregados</th>
+                    <th>Observaciones</th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-equipo let-editing="editing" let-key="rowIndex">
+                <tr [pEditableRow]="equipo">
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input"> {{equipo.modelo}} </ng-template>
+                            <ng-template pTemplate="output"> {{equipo.modelo}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input"> {{equipo.marca}} </ng-template>
+                            <ng-template pTemplate="output"> {{equipo.marca}}</ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" [(ngModel)]="equipo.serial" name="serial" />
+                            </ng-template>
+                            <ng-template pTemplate="output"> {{equipo.serial}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input"> {{equipo.ubicacion}} </ng-template>
+                            <ng-template pTemplate="output"> {{equipo.ubicacion}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input"> {{equipo.pgLinealesRecibidos}} </ng-template>
+                            <ng-template pTemplate="output"> {{equipo.pgLinealesRecibidos}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" />
+                            </ng-template>
+                            <ng-template pTemplate="output"> {{equipo.pgLinealesRecibidos}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" />
+                            </ng-template>
+                            <ng-template pTemplate="output"> {{equipo.observacion}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <div class="flex align-items-center justify-content-center gap-2">
+                            <p-button *ngIf="!editing" pInitEditableRow icon="pi pi-pencil" severity="success"
+                                (click)="onRowEditInitEquipos(equipo)"></p-button>
+                            <p-button *ngIf="!editing" icon="pi pi-trash" severity="danger"
+                                (click)="onDeleteEquipos(key)"></p-button>
+                            <p-button *ngIf="editing" pSaveEditableRow icon="pi pi-check"
+                                (click)="onRowEditSaveEquipos(equipo)" severity="success"></p-button>
+                            <p-button *ngIf="editing" pCancelEditableRow icon="pi pi-times" severity="danger"
+                                (click)="onRowEditCancelEquipos(equipo, key)"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-fieldset>
+    <p-fieldset legend="Actividades realizadas">
+        <div class="flex flex-column gap-2">
+            <textarea rows="3" pInputTextarea></textarea>
+        </div>
+    </p-fieldset>
+    <p-fieldset legend="Lista de verificación">
+        <div class="flex justify-content-center gap-3">
+            @for (item of listaVerificacion; track $index) {
+            <div class="flex align-items-center">
+                <p-checkbox [label]="item" name="group" [value]="item" (onChange)="onChangeVerificacion(item)" />
+            </div>
+            }
+        </div>
+    </p-fieldset>
+    <p-fieldset legend="Repuestos utilizados">
+        <p-table>
+            <ng-template pTemplate="caption">
+                <div class="flex">
+                    <p-button label="Agregar" [rounded]="true" icon="pi pi-plus" severity="success" />
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Numero de serie</th>
+                    <th>Descrpción</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-repuesto let-editing="editing" let-i="rowIndex">
+                <tr [pEditableRow]="true">
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" />
+                            </ng-template>
+                            <ng-template pTemplate="output"> {{repuesto.numeroSerie}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" />
+                            </ng-template>
+                            <ng-template pTemplate="output"> {{repuesto.numeroSerie}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" />
+                            </ng-template>
+                            <ng-template pTemplate="output"> {{repuesto.numeroSerie}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" />
+                            </ng-template>
+                            <ng-template pTemplate="output"> {{repuesto.numeroSerie}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <div class="flex align-items-center justify-content-center gap-2">
+                            <p-button *ngIf="!editing" pInitEditableRow icon="pi pi-pencil" severity="success"
+                                (click)="onRowEditInitRepuestos(repuesto)"></p-button>
+                            <p-button *ngIf="!editing" icon="pi pi-trash" severity="danger"></p-button>
+                            <p-button *ngIf="editing" pSaveEditableRow icon="pi pi-check"
+                                (click)="onRowEditSaveRepuestos(repuesto)" severity="success"></p-button>
+                            <p-button *ngIf="editing" pCancelEditableRow icon="pi pi-times" severity="danger"
+                                (click)="onRowEditCancelRepuestos(repuesto, i)"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-fieldset>
+    <p-fieldset legend="Repuestos devueltos / retirados">
+        <p-table>
+            <ng-template pTemplate="caption">
+                <div class="flex">
+                    <p-button label="Agregar" [rounded]="true" icon="pi pi-plus" severity="success" />
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Numero de serie</th>
+                    <th>Descrpción</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-repuesto let-editing="editing" let-i="rowIndex">
+                <tr [pEditableRow]="true">
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" />
+                            </ng-template>
+                            <ng-template pTemplate="output"> {{repuesto.numeroSerie}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" />
+                            </ng-template>
+                            <ng-template pTemplate="output"> {{repuesto.numeroSerie}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" />
+                            </ng-template>
+                            <ng-template pTemplate="output"> {{repuesto.numeroSerie}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <input pInputText type="text" />
+                            </ng-template>
+                            <ng-template pTemplate="output"> {{repuesto.numeroSerie}} </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <td>
+                        <div class="flex align-items-center justify-content-center gap-2">
+                            <p-button *ngIf="!editing" pInitEditableRow icon="pi pi-pencil" severity="success"
+                                (click)="onRowEditInitRepuestos(repuesto)"></p-button>
+                            <p-button *ngIf="!editing" icon="pi pi-trash" severity="danger"></p-button>
+                            <p-button *ngIf="editing" pSaveEditableRow icon="pi pi-check"
+                                (click)="onRowEditSaveRepuestos(repuesto)" severity="success"></p-button>
+                            <p-button *ngIf="editing" pCancelEditableRow icon="pi pi-times" severity="danger"
+                                (click)="onRowEditCancelRepuestos(repuesto, i)"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-fieldset>
+    <p-fieldset legend="Observaciones">
+        <div class="flex flex-column gap-2">
+            <textarea rows="4" pInputTextarea></textarea>
+        </div>
+    </p-fieldset>
+</form>

@@ -1,0 +1,58 @@
+<p-card header="Listado de clientes de ETIMET">
+    <p-table #dtData [value]="listClientes" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingClientes"
+        [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['IdCliente','CodigoCliente', 'IdentificacionCliente', 'RazonSocial', 'NombreComercial']">
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                <div class="flex gap-3">
+                    <p-button label="Sincronizar" icon="pi pi-sync" [loading]="loadingClientes"
+                        (onClick)="onGetClientes()" />
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData
+                        , $event)" placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="IdCliente">Id <p-sortIcon field="IdCliente" /></th>
+                <th pSortableColumn="CodigoCliente">Código Taurus <p-sortIcon field="CodigoCliente" /></th>
+                <th pSortableColumn="IdentificacionCliente">Identificación <p-sortIcon field="IdentificacionCliente" />
+                </th>
+                <th pSortableColumn="RazonSocial">Razon Social <p-sortIcon field="RazonSocial" /></th>
+                <th pSortableColumn="NombreComercial">Nombre comercial <p-sortIcon field="NombreComercial" /></th>
+                <th pSortableColumn="EstadoCliente">Estado <p-sortIcon field="EstadoCliente" /></th>
+                <th pSortableColumn="Calificacion">Calificación <p-sortIcon field="Calificacion" /></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-cliente let-columns="columns">
+            <tr>
+                <td>
+                    {{cliente.IdCliente}}
+                </td>
+                <td>
+                    {{cliente.CodigoCliente}}
+                </td>
+                <td>
+                    {{cliente.IdentificacionCliente}}
+                </td>
+                <td>
+                    {{cliente.RazonSocial}}
+                </td>
+                <td>
+                    {{cliente.NombreComercial}}
+                </td>
+                <td>
+                    <p-tag *ngIf="cliente.EstadoCliente" value="Activado" severity="success" />
+                    <p-tag *ngIf="!cliente.EstadoCliente" value="Desactivado" severity="danger" />
+                </td>
+                <td>
+                    <p-rating [(ngModel)]="cliente.Calificacion" [cancel]="false"
+                        (ngModelChange)="onUpdateRating(cliente, $event)" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>

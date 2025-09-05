@@ -1,0 +1,283 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSendData"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGetData"></app-blocked-get-info-database>
+<p-card header="Ingreso de orden de compra">
+    <div class="grid">
+        <p-fieldset legend="Proveedores" class="col-12 md:col-8">
+            <div class="flex flex-column gap-3">
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-12rem">Proveedor</label>
+                    <div class="flex-auto">
+                        <p-dropdown *ngIf="compraService.newOC" id="proveedor" [options]="listProveedor"
+                            placeholder="Escoja una opcion" styleClass="w-full" [filter]="true"
+                            [filterFields]="['RazonSocialProveedor']" [showClear]="true" filterPlaceholder="Buscando..."
+                            [virtualScroll]="true" [virtualScrollItemSize]="20" [loading]="loadingProveedor"
+                            (ngModelChange)="onChangeProveedor($event)" [(ngModel)]="selectedProveedor">
+                            <ng-template let-prov pTemplate="selectedItem">
+                                <div class="custom-dropdown-item">
+                                    {{ prov.RazonSocialProveedor }}
+                                </div>
+                            </ng-template>
+                            <ng-template let-prov pTemplate="item">
+                                <div class="custom-dropdown-item">
+                                    {{ prov.RazonSocialProveedor }}
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                        <b *ngIf="!compraService.newOC"
+                            class="font-semibold flex-auto text-xl">{{compraService.cabecera.RazonSocialProveedor}}</b>
+                    </div>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-12rem">Identificación</label>
+                    <b class="font-semibold flex-auto text-xl">{{compraService.cabecera.IdentificacionProveedor}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-12rem">Dirección</label>
+                    <b class="font-semibold flex-auto text-xl">{{compraService.cabecera.DirecionProveedor}}</b>
+                </div>
+                <div class="flex align-items-center gap-3" *ngIf="infoProveedor !== undefined">
+                    <label for="proveedor" class="font-semibold w-12rem">Forma de pago</label>
+                    <b class="font-semibold flex-auto text-xl">{{infoProveedor.PlazoPago}}días --
+                        {{infoProveedor.TipoPago}}</b>
+                </div>
+            </div>
+        </p-fieldset>
+        <p-fieldset legend="Información" class="col-12 md:col-4">
+            <div class="flex flex-column gap-3">
+                <div class="flex align-items-center gap-3 mb-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Fecha creacion</label>
+                    <b class="font-semibold flex-auto text-xl">
+                        {{compraService.cabecera.FechaRegistroOrdenCompra| date:"EEEE, d MMMy"}}
+                    </b>
+                </div>
+            </div>
+            <div class="flex flex-column gap-3">
+                <div class="flex align-items-center gap-3 mb-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Fecha entrega</label>
+                    <p-calendar *ngIf="compraService.newOC" [(ngModel)]="compraService.cabecera.FechaEntrega"
+                        dateFormat="dd-mm-yy" (ngModelChange)="onChangeFecha()" [minDate]="minDate" />
+                    <b *ngIf="!compraService.newOC" class="font-semibold flex-auto text-xl">
+                        {{compraService.cabecera.FechaEntrega | date: "EEEE, d MMM y"}}
+                    </b>
+                </div>
+            </div>
+            <div class="flex">
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Plazo días</label>
+                    <b class="font-semibold flex-auto text-xl">
+                        {{compraService.cabecera.Plazo}}
+                    </b>
+                </div>
+            </div>
+        </p-fieldset>
+        <p-fieldset legend="Detalle" class="col-12 md:col-12">
+            <p-table #dtData [value]="compraService.detalles" [tableStyle]="{'min-width': '10rem'}"
+                styleClass="p-datatable-sm" [responsive]="true" [scrollable]="true" scrollDirection="horizontal">
+                <ng-template pTemplate="caption">
+                    <div class="flex justify-content-between">
+                        <p-button label="Agregar" severity="success" icon="fa-solid fa-plus"
+                            (onClick)="onOpenModalAddDetalle()"></p-button>
+                        <div>
+                            <table class="text-right">
+                                <tr>
+                                    <td class="semibold">Total KG:</td>
+                                    <td class="ml-3">
+                                        <b>{{pesoTotal | number: '1.2-2'}}</b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Total M2:</td>
+                                    <td class="ml-3">
+                                        <b>{{metroscuadradoTotal | number: '1.2-2'}}</b>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="mr-6">
+                            <table class="text-right">
+                                <tr>
+                                    <td>Subtotal:</td>
+                                    <td class="ml-3">
+                                        <b>{{valorSubtotal | currency: 'USD':'symbol':'1.2-2'}}</b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Iva:</td>
+                                    <td class="ml-3">
+                                        <b>{{valorIva | currency: 'USD':'symbol':'1.2-2'}}</b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">Neto:</td>
+                                    <td class="ml-3">
+                                        <b>{{valorTotal | currency: 'USD':'symbol':'1.2-2'}}</b>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th style="min-width:100px">Acciones</th>
+                        <th style="min-width:75px">Num</th>
+                        <th style="min-width:500px">Descripción</th>
+                        <th style="min-width:100px">Código interno</th>
+                        <th style="min-width:100px">Bobinas</th>
+                        <th style="min-width:100px">Ancho</th>
+                        <th style="min-width:100px">Largo</th>
+                        <th class="text-center" style="min-width:100px">M2</th>
+                        <th class="text-center" style="min-width:100px">Kg</th>
+                        <th class="text-center" style="min-width:100px">Precio</th>
+                        <th class="text-center" style="min-width:100px">Subtotal</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-detalle let-rowIndex="rowIndex">
+                    <tr>
+                        <td class="flex gap-2 justify-content-center">
+                            <p-button icon="fa-solid fa-pencil" [raised]="true" severity="primary" pTooltip="Editar"
+                                tooltipPosition="bottom" (onClick)="onOpenModalEdit(detalle, rowIndex)"></p-button>
+                            <p-button icon="fa-solid fa-trash" [raised]="true" severity="danger" pTooltip="Eliminar"
+                                tooltipPosition="bottom" (onClick)="onDeleteDetalle(rowIndex)"></p-button>
+                        </td>
+                        <td>{{rowIndex +1}}</td>
+                        <td>{{detalle.DescripcionDetalleCompra}}</td>
+                        <td>{{detalle.CodigoInternoSustrato }}</td>
+                        <td>{{detalle.CantidadCompra}}</td>
+                        <td>{{detalle.AnchoDetalleCompra}}</td>
+                        <td>{{detalle.LargoDetalleCompra}}</td>
+                        <td class="text-right">{{detalle.CantidadDetalleCompra | number : '1.2-2'}}</td>
+                        <td class="text-right">{{(detalle.PesoProductoDetalleCompra) | number:
+                            '1.2-2'}}</td>
+                        <td class="text-right">{{detalle.ValorDetalleCompra | currency: 'USD':'symbol':'1.2-4'}}</td>
+                        <td class="text-right">{{detalle.BaseIvaDetalleCompra | currency: 'USD':'symbol':'1.2-4'}}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-fieldset>
+        <p-fieldset legend="Finalizar" class="col-12 md:col-12">
+            <p-button icon="fa-solid fa-floppy-disk" label="Aceptar" severity="success"
+                (onClick)="finalizar()"></p-button>
+        </p-fieldset>
+    </div>
+</p-card>
+<p-toast position="top-right"></p-toast>
+<!--MODAL DE AGREGAR DETALLE-->
+<p-dialog [header]="headerModalCrear ? 'Crear sustrato':'Editar sustrato'" [modal]="true" [(visible)]="modalAddDetalle"
+    [style]="{ width: '50rem' }">
+    <div class="mt-2">
+        <form class="flex flex-column gap-3" [formGroup]="myForm" (ngSubmit)="onSaveOrEditDetalle()">
+            <div class="flex align-items-center gap-3">
+                <label for="valor" class="font-semibold w-7rem">Iva</label>
+                <div class="flex-auto">
+                    <p-dropdown id="iva" [options]="listIva" placeholder="Escoja una opcion" styleClass="w-full"
+                        [filter]="true" [showClear]="true" filterPlaceholder="Buscando..." formControlName="iva">
+                        <ng-template let-iva pTemplate="selectedItem">
+                            <div class="custom-dropdown-item">
+                                {{ iva }} %
+                            </div>
+                        </ng-template>
+                        <ng-template let-iva pTemplate="item">
+                            <div class="custom-dropdown-item">
+                                {{ iva }} %
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="producto" class="font-semibold w-7rem">Producto</label>
+                <div class="flex-auto">
+                    <p-dropdown formControlName="producto" id="producto" [options]="listProducto" optionValue=""
+                        optionValue="CodigoCatalogoSustrato" placeholder="Escoja una opcion" styleClass="w-full"
+                        [filter]="true" [filterFields]="['CodigoInternoSustrato', 'NombreTipoMaterial']"
+                        [showClear]="true" [loading]="loadingProducto" filterPlaceholder="Buscando..."
+                        (ngModelChange)="onChangeProducto($event)" [virtualScroll]="true" [virtualScrollItemSize]="20">
+                        <ng-template let-PI pTemplate="selectedItem">
+                            <div class="custom-dropdown-item-selected">
+                                {{ PI.CodigoInternoSustrato }} - {{PI.DescripcionSustrato}}
+                            </div>
+                        </ng-template>
+                        <ng-template let-GI pTemplate="item">
+                            <div class="custom-dropdown-item">
+                                {{ GI.CodigoInternoSustrato }} - {{GI.DescripcionSustrato}}
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="ancho" class="font-semibold w-7rem">Medida</label>
+                <div class="flex-auto">
+                    <p-dropdown formControlName="ancho" id="ancho" [options]="medidas" optionValue="AnchoSustrato"
+                        placeholder="Escoja una opcion" styleClass="w-full" [showClear]="true"
+                        [loading]="loadingMedidas" (ngModelChange)="onCalculateM2()" [virtualScroll]="true"
+                        [virtualScrollItemSize]="20">
+                        <ng-template let-TM pTemplate="selectedItem">
+                            <div class="custom-dropdown-item-selected">
+                                {{ TM.AnchoSustrato }} mm
+                            </div>
+                        </ng-template>
+                        <ng-template let-TM pTemplate="item">
+                            <div class="custom-dropdown-item">
+                                {{ TM.AnchoSustrato }} mm
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="bobina" class="font-semibold w-7rem">Bobinas</label>
+                <p-inputNumber formControlName="bobina" id="bobina" [minFractionDigits]="0" mode="decimal"
+                    locale="en-US" currency="USD" [min]="0" (ngModelChange)="onCalculateM2()" />
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="largo" class="font-semibold w-7rem">Metros lineales</label>
+                <p-inputNumber formControlName="largo" id="largo" [minFractionDigits]="3" mode="decimal" locale="en-US"
+                    currency="USD" [min]="0" (ngModelChange)="onCalculateM2()" />
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="precio" class="font-semibold w-7rem">Precio</label>
+                <p-inputNumber formControlName="precio" id="precio" [minFractionDigits]="4" mode="decimal"
+                    locale="es-EC" currency="USD" [min]="0" />
+            </div>
+            <div class="flex align-items-center gap-3" *ngIf="selectProducto !== undefined">
+                <label for="valor" class="font-semibold w-7rem">Unidad de medida</label>
+                <b class="flex-auto">{{selectProducto.UnidadMedida}}</b>
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="valor" class="font-semibold w-7rem">Valor</label>
+                <p-inputNumber formControlName="valor" id="valor" [minFractionDigits]="4" mode="decimal" locale="es-EC"
+                    currency="USD" [min]="0" />
+            </div>
+            <div class="flex align-items-center gap-3">
+                <label for="precio" class="font-semibold w-7rem">Información</label>
+                <table class="w-8 tableInformacion">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;"></th>
+                            <th class="text-lg">Unidad</th>
+                            <th class="text-lg">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-center">Metros cuadrados</td>
+                            <td class="text-right text-2xl">{{metroscuadrados | number : '1.2-2'}}</td>
+                            <td class="text-right text-2xl">{{totalMetroscuadrados | number : '1.2-2'}}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">Peso kilogramos</td>
+                            <td class="text-right text-2xl">{{kilogramos | number : '1.2-2'}}</td>
+                            <td class="text-right text-2xl">{{totalKilogramos | number : '1.2-2'}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+                <p-button label="Cerrar" severity="secondary" (onClick)="modalAddDetalle = false" />
+            </div>
+        </form>
+    </div>
+</p-dialog>

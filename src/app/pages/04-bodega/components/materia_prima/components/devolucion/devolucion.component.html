@@ -1,0 +1,74 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Control de bitacoras en Producción">
+    <div class="flex gap-3">
+        <p-fieldset legend="Formulario de busqueda">
+            <form [formGroup]="myFormSearchOp" class="flex flex-column gap-3" (ngSubmit)="onSearchOP()">
+                <div class="flex flex-column">
+                    <label for="cilindro">Número de OP</label>
+                    <p-inputNumber formControlName="numOp" [minFractionDigits]="0" locale="en-US" [min]="0" />
+                </div>
+                <div class="flex flex-column">
+                    <label for="codigoBarras">Código de barras</label>
+                    <input pInputText id="codigoBarras" class="flex-auto" autocomplete="off"
+                        formControlName="codigoBarras" />
+                </div>
+                <div class="flex justify-content-center">
+                    <p-button type="submit" label="Buscar" icon="fa-solid fa-magnifying-glass" [raised]="true"
+                        severity="primary"></p-button>
+                </div>
+            </form>
+        </p-fieldset>
+        @if(infoKardex !== undefined){
+        <p-fieldset legend="Registros de Bitacora">
+            <div class="flex flex-column gap-2">
+                <div class="flex flex-column">
+                    <label>Materia Prima</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.CodigoInterno}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Código de barras</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.CodigoBarras}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Descripción</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.DescripcionInventario}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Proveedor</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.RazonSocialProveedor}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Ancho (mm)</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.Ancho}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Largo (m)</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.Largo}}</label>
+                </div>
+                <div class="flex flex-column">
+                    <label>Peso (Kg)</label>
+                    <label for="usuario" class="text-2xl font-bold ">{{infoKardex.PesoTotal}}</label>
+                </div>
+            </div>
+        </p-fieldset>
+        <p-fieldset legend="Devolución de material">
+            <form [formGroup]="myFormPeso" class="flex flex-column gap-2" (ngSubmit)="onSaveDevolucion()">
+                <div class="flex flex-column">
+                    <label for="cilindro">Peso Kg</label>
+                    <p-inputNumber formControlName="peso" [minFractionDigits]="2" locale="en-US" [min]="0"
+                        (ngModelChange)="onCalculateMetros()" />
+                </div>
+                <div class="flex flex-column">
+                    <label>Metros Lineales</label>
+                    <label for="usuario" class="text-2xl font-bold">{{newMetrosLineales | number: '0.2-2'}}</label>
+                </div>
+                <div class="flex justify-content-center">
+                    <p-button type="submit" label="Guardar" icon="fa-solid fa-floppy-disk" [raised]="true"
+                        severity="success"></p-button>
+                </div>
+            </form>
+        </p-fieldset>
+        }
+    </div>
+</p-card>

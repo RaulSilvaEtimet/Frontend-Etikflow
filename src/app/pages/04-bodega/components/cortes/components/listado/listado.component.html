@@ -1,0 +1,263 @@
+<app-blocked-send-info-database [blockedPanel]="blockedPanel"></app-blocked-send-info-database>
+<p-card header="Listado de ordenes de corte">
+    <p-table #dtData [value]="listOrdenCorte" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingOrdCor"
+        [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['Usuario','Secuencial','DescripcionEstado']" [responsive]="true" [scrollable]="true"
+        scrollDirection="horizontal" [paginator]="true" [rowsPerPageOptions]="[10, 20, 50]">
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                <form [formGroup]="myFormSearch" class="flex gap-2" (ngSubmit)="onSearchOrdenCorte()">
+                    <div class="flex align-items-center gap-3">
+                        <label class="font-semibold">Fecha Inicio</label>
+                        <div class="flex-auto">
+                            <p-calendar styleClass="w-full" formControlName="fechaIni" />
+                        </div>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="" class="font-semibold">Fecha Fin</label>
+                        <div class="flex-auto">
+                            <p-calendar styleClass="w-full" formControlName="fechaFin" />
+                        </div>
+                    </div>
+                    <div class="flex justify-content-center">
+                        <p-button label="Buscar" icon="fa-solid fa-magnifying-glass" severity="primary"
+                            [loading]="loadingOrdCor" type="submit"></p-button>
+                    </div>
+                </form>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData, $event)"
+                        placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pSortableColumn="Secuencial" style="width: 100px;">
+                    Orden de corte <p-sortIcon field="Secuencial" />
+                </th>
+                <th style="min-width:50px; width: 75px;">Accion</th>
+                <th pSortableColumn="UsuarioRegistroOrdenCompra">
+                    Usuario <p-sortIcon field="UsuarioRegistroOrdenCompra" />
+                </th>
+                <th>Fecha creacion</th>
+                <th pSortableColumn="DescripcionEstadoCompra">
+                    Estado <p-sortIcon field="DescripcionEstadoCompra" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item let-columns="columns" let-rowIndex="rowIndex">
+            <tr>
+                <td>{{item.Secuencial}}</td>
+                <td class="flex gap-2 justify-content-center">
+                    <p-button icon="fa-solid fa-eye" [raised]="true" severity="success" pTooltip="Visualizar"
+                        tooltipPosition="bottom" (onClick)="onOpenOrdenCorte(item)"></p-button>
+                </td>
+                <td>{{item.Usuario}}</td>
+                <td>{{item.FechaRegistroOrdenCorte | date : 'dd-MMMM-yyyy HH:mm'}}</td>
+                <td>
+                    <p-tag [value]="item.DescripcionEstado" severity="success"
+                        *ngIf="item.DescripcionEstado === 'Pendiente'"></p-tag>
+                    <p-tag [value]="item.DescripcionEstado" severity="warning"
+                        *ngIf="item.DescripcionEstado === 'Procesado'"></p-tag>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+<!--MODAL DE VISUALIZACION-->
+<p-dialog header="Orden de corte" [modal]="true" [(visible)]="modalInformacion" [style]="{ width: '70rem' }"
+    [scrollTop]="true" [maximizable]="true">
+    <div class="mt-2">
+        <div class="flex flex-column gap-3">
+            <p-fieldset legend="Información">
+                <div class="flex flex-column gap-3 justify-content-center">
+                    <div class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-10rem">Usuario</label>
+                        <b class="font-semibold flex-auto text-xl">{{ordCorCabecera.Usuario}}</b>
+                    </div>
+                    <div class="flex align-items-center gap-3">
+                        <label for="proveedor" class="font-semibold w-10rem">Fecha creación</label>
+                        <b class="font-semibold flex-auto text-xl">
+                            {{ordCorCabecera.FechaRegistroOrdenCorte | date: 'dd-MMMM-yyyy HH:mm'}}
+                        </b>
+                    </div>
+                </div>
+            </p-fieldset>
+            <p-fieldset legend="Bobinas seleccionadas">
+                <p-table [value]="listOrdCorKardex" [responsive]="true" [scrollable]="true" scrollDirection="horizontal"
+                    styleClass="p-datatable-sm">
+                    <ng-template pTemplate="caption">
+                        <div class="flex gap-3" *ngIf="ordCorCabecera.Estado === 11">
+                            <p-button icon="fa-solid fa-stopwatch" severity="primary" pTooltip="Iniciar corte"
+                                tooltipPosition="bottom" [raised]="true" (onClick)="onOpenCorte(1)"></p-button>
+                            <p-button icon="fa-solid fa-check" severity="success" pTooltip="Cerrar corte"
+                                tooltipPosition="bottom" [raised]="true" (onClick)="onOpenCorte(2)"></p-button>
+                            <p-button ngif icon="fa-solid fa-people-carry-box" severity="warning"
+                                pTooltip="Devolver corte" tooltipPosition="bottom" [raised]="true"
+                                (onClick)="onOpenCorte(3)"></p-button>
+                        </div>
+                    </ng-template>
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Num</th>
+                            <th>Accion</th>
+                            <th>Id Kardex</th>
+                            <th>Código barras</th>
+                            <th>Inicio</th>
+                            <th>Fin</th>
+                            <th>Estado</th>
+                            <th>Observacion</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item let-ri="rowIndex">
+                        <tr>
+                            <td>{{ (ri+1) }}</td>
+                            <td>
+                                <button *ngIf="item.Estado === 12" pButton pRipple type="button"
+                                    icon="fa-solid fa-print" severity="secondary" class="p-button-text"
+                                    pTooltip="Imprimir Etiquetas" tooltipPosition="bottom"
+                                    (click)="onPrintEtiquetas(item)" [loading]="loadingEtiquetas">
+                                </button>
+                                <button *ngIf="item.Estado === 14 || item.Estado === 12" pButton pRipple type="button"
+                                    icon="fa-solid fa-comments" severity="secondary" class="p-button-text"
+                                    pTooltip="Ver bitacora" tooltipPosition="bottom"
+                                    (click)="onViewBitacora(item.IdOrdenCorteKardex, item.CodigoBarras, item.Estado)">
+                                </button>
+                            </td>
+                            <td>{{ item.IdKardex }}</td>
+                            <td>{{ item.CodigoBarras }}</td>
+                            <td>{{ item.UsuarioInicio}}</td>
+                            <td>{{ item.UsuarioFin}}</td>
+                            <td>
+                                <p-tag [value]="item.DescripcionEstado" severity="success"
+                                    *ngIf="item.DescripcionEstado === 'Pendiente'"></p-tag>
+                                <p-tag [value]="item.DescripcionEstado" severity="warning"
+                                    *ngIf="item.DescripcionEstado === 'Procesado'"></p-tag>
+                                <p-tag [value]="item.DescripcionEstado" severity="info"
+                                    *ngIf="item.DescripcionEstado === 'En Proceso'"></p-tag>
+                                <p-tag [value]="item.DescripcionEstado" severity="danger"
+                                    *ngIf="item.DescripcionEstado === 'Cancelado'"></p-tag>
+                            </td>
+                            <td>{{ item.Observacion }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-fieldset>
+            <p-fieldset legend="Cortes a generar">
+                <p-table [value]="listOrdCorDetalle" styleClass="p-datatable-sm">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Parada</th>
+                            <th>Largo</th>
+                            <th>Anchos</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-detalle let-ri="rowIndex">
+                        <tr>
+                            <td>{{ detalle.Parada }}</td>
+                            <td>{{ detalle.LargoCorte }}</td>
+                            <td>{{ detalle.AnchoCorte }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-fieldset>
+            <p-fieldset legend="Acciones" *ngIf="ordCorCabecera.Estado === 11">
+                <div class="flex gap-2">
+                    <p-button label="Imprimir orden de corte" icon="fa-solid fa-print" severity="success"
+                        [raised]="true" (onClick)="onImprimirOrdenCorte()"></p-button>
+                    <p-button label="Cerrar orden de corte" icon="fa-solid fa-close" severity="primary" [raised]="true"
+                        (onClick)="onCerrarOrdenCorte()"></p-button>
+                </div>
+            </p-fieldset>
+        </div>
+    </div>
+</p-dialog>
+<!--MODAL DE SELECCIONAR CORTE-->
+<p-dialog header="Seleccionar" [modal]="true" [(visible)]="modalKardex1" [style]="{ width: '30rem' }">
+    <div class="mt-2">
+        <form [formGroup]="myFormKardex1" class="flex flex-column gap-3" (ngSubmit)="onSelectKardex1()">
+            <div class="flex align-items-center gap-2">
+                <label for="idKardex" class="font-semibold w-9rem">Bobina o corte selecionado</label>
+                <input pInputText type="text" formControlName="idKardex" />
+            </div>
+            <div class="flex justify-content-center gap-2">
+                <p-button label="Comprobar" icon="fa-solid fa-check" severity="success" type="submit" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL DE SELECCIONAR CORTE DEVOLUCION-->
+<p-dialog header="Seleccionar" [modal]="true" [(visible)]="modalKardex2" [style]="{ width: '30rem' }">
+    <div class="mt-2">
+        <form [formGroup]="myFormKardex2" class="flex flex-column gap-3" (ngSubmit)="onSelectKardex2()">
+            <div class="flex align-items-center gap-2">
+                <label for="idKardex" class="font-semibold w-9rem">Bobina o corte selecionado</label>
+                <input pInputText type="text" formControlName="idKardex" />
+            </div>
+            <div class="flex align-items-center gap-2">
+                <label for="observacion" class="font-semibold w-9rem">Observacion</label>
+                <input pInputText type="text" formControlName="observacion" maxlength="250" />
+            </div>
+            <div class="flex justify-content-center gap-2">
+                <p-button label="Comprobar" icon="fa-solid fa-check" severity="success" type="submit" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL DE BITACORA-->
+<p-dialog [header]="'Bitacora ' + codBarraBitacora" [modal]="true" [(visible)]="modalBitacora"
+    [style]="{ width: '60rem' }">
+    <div class="mt-2">
+        <p-table [value]="listBitacora" [tableStyle]="{'min-width': '50rem'}" [loading]="loadingBitacora"
+            styleClass="p-datatable-sm">
+            <ng-template pTemplate="caption">
+                <div class="flex">
+                    <p-button *ngIf="viewAddBitacora" severity="primary" icon="fa-solid fa-plus" [raised]="true"
+                        pTooltip="Agregar bitacora" tooltipPosition="bottom" (onClick)="onAddBitacora()"></p-button>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header" let-columns>
+                <tr>
+                    <th>Num</th>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Observación</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-bitacora let-columns="columns" let-ri="rowIndex">
+                <tr>
+                    <td class="text-center">{{(ri+1)}}</td>
+                    <td>{{bitacora.FechaRegistro | date : 'dd-MMMM-yyyy HH:mm' }}</td>
+                    <td>{{bitacora.Usuario }}</td>
+                    <td>{{bitacora.Observacion }}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</p-dialog>
+<!--MODAL DE AGREGAR BITACORA-->
+<p-dialog header="Agregar bitacora" [modal]="true" [(visible)]="modalAddBitacora" [style]="{ width: '40rem' }">
+    <div class="mt-2">
+        <form [formGroup]="myFormBitacora" class="flex flex-column gap-3" (ngSubmit)="onSaveBitacora()">
+            <div class="flex align-items-center gap-2">
+                <label for="menu" class="font-semibold w-8rem">Opción</label>
+                <div class="flex-auto">
+                    <p-dropdown id="menu" [options]="listOpciones" placeholder="Escoja una opcion" styleClass="w-full"
+                        formControlName="menu" (ngModelChange)="onChangeMenu($event)">
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="flex align-items-center gap-2">
+                <label for="observacion" class="font-semibold w-8rem">Observación</label>
+                <div class="flex-auto">
+                    <input class="w-full" pInputText type="text" formControlName="observacion" />
+                </div>
+            </div>
+            <div class="flex h-4rem"></div>
+            <div class="flex justify-content-center gap-2">
+                <p-button label="Guardar" icon="fa-solid fa-floppy-disk" severity="success" type="submit" />
+            </div>
+        </form>
+    </div>
+</p-dialog>

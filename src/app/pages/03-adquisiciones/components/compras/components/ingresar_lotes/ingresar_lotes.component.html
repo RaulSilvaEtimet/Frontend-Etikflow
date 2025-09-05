@@ -1,0 +1,88 @@
+<app-blocked-send-info-database [blockedPanel]="blockedPanel"></app-blocked-send-info-database>
+<p-card header="Ingreso de orden de compra">
+    <div class="grid">
+        <p-fieldset legend="Proveedores" class="col-12 md:col-6">
+            <div class="flex flex-column gap-3">
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-12rem">Proveedor</label>
+                    <div class="flex-auto">
+                        <b class="font-semibold flex-auto text-xl">{{cabecera.RazonSocialProveedor}}</b>
+                    </div>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-12rem">NIT</label>
+                    <b class="font-semibold flex-auto text-xl">{{cabecera.IdentificacionProveedor}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-12rem">Dirección</label>
+                    <b class="font-semibold flex-auto text-xl">{{cabecera.DirecionProveedor}}</b>
+                </div>
+            </div>
+        </p-fieldset>
+        <p-fieldset legend="Información" class="col-12 md:col-6">
+            <div class="flex flex-column gap-3">
+                <div class="flex align-items-center gap-3 mb-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Fecha creacion</label>
+                    <b class="font-semibold flex-auto text-xl">
+                        {{cabecera.FechaRegistroOrdenCompra| date:"EEEE, d MMMy"}}
+                    </b>
+                </div>
+            </div>
+            <div class="flex flex-column gap-3">
+                <div class="flex align-items-center gap-3 mb-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Fecha entrega</label>
+                    <b class="font-semibold flex-auto text-xl">
+                        {{cabecera.FechaEntrega | date: "EEEE, d MMM y"}}
+                    </b>
+                </div>
+            </div>
+            <div class="flex">
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Plazo días</label>
+                    <b class="font-semibold flex-auto text-xl">
+                        {{cabecera.Plazo}}
+                    </b>
+                </div>
+            </div>
+        </p-fieldset>
+        <p-fieldset legend="Bobinas" class="col-12 md:col-12">
+            <p-table [value]="bobinas" editable="true" [tableStyle]="{'min-width': '10rem'}" styleClass="p-datatable-sm"
+                [responsive]="true" [scrollable]="true" scrollDirection="horizontal">
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th style="min-width:75px">Num</th>
+                        <th style="min-width:100px">Código interno</th>
+                        <th style="min-width:100px">Ancho mm</th>
+                        <th style="min-width:100px">Largo m</th>
+                        <th style="min-width:100px">Peso kg</th>
+                        <th style="min-width:100px">Lote</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-bobina let-rowIndex="rowIndex" let-editing="editing">
+                    <tr>
+                        <td>{{rowIndex +1}}</td>
+                        <td>{{bobina.CodigoInterno}}</td>
+                        <td>{{bobina.Ancho }}</td>
+                        <td>{{bobina.Largo}}</td>
+                        <td>{{bobina.PesoMaterial | number : '1.2-2'}}</td>
+                        <td pEditableColumn>
+                            <p-cellEditor>
+                                <ng-template pTemplate="input">
+                                    <input pInputText type="text" [(ngModel)]="bobina.Lote" />
+                                </ng-template>
+                                <ng-template pTemplate="output">
+                                    {{ bobina.Lote }}
+                                </ng-template>
+                            </p-cellEditor>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-fieldset>
+        <p-fieldset legend="Finalizar" class="col-12 md:col-12">
+            <p-button icon="fa-solid fa-floppy-disk" label="Aceptar" severity="success"
+                (onClick)="onFinalizar()"></p-button>
+        </p-fieldset>
+    </div>
+</p-card>
+<p-toast position="top-right"></p-toast>

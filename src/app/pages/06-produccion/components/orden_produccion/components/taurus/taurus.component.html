@@ -1,0 +1,53 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSend"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGet"></app-blocked-get-info-database>
+<p-card header="Listado de ordenes de producción">
+    <p-table #dtData [value]="listOP" [loading]="loadingOP" [paginator]="true" [rows]="10" styleClass="p-datatable-sm"
+        [globalFilterFields]="['OrdenProduccion','OrdenProduccionTaurus','NombreProductoEtimet','CodigoFinalProductoTerminado','Estado']"
+        [responsive]="true" [scrollable]="true" scrollDirection="horizontal" [paginator]="true"
+        [rowsPerPageOptions]="[10, 20, 50, 100]">
+        <ng-template pTemplate="caption">
+            <div class="flex gap-2">
+                <div class="flex">
+                    <p-button label="Sincronizar" icon="fa-solid fa-rotate" [raised]="true" severity="primary"
+                        (onClick)="ngOnInit()"></p-button>
+                </div>
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchValue" (input)="onGlobalFilter(dtData, $event)"
+                        placeholder="Filtrar..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th style="width: 120px;" pSortableColumn="OrdenProduccion">
+                    EtikFlow <p-sortIcon field="OrdenProduccion" />
+                </th>
+                <th pSortableColumn="OrdenProduccionTaurus">
+                    Taurus <p-sortIcon field="OrdenProduccionTaurus" />
+                </th>
+                <th pSortableColumn="NombreProductoEtimet">
+                    Producto <p-sortIcon field="NombreProductoEtimet" />
+                </th>
+                <th pSortableColumn="CodigoFinalProductoTerminado">
+                    Codigo Producto <p-sortIcon field="CodigoFinalProductoTerminado" />
+                </th>
+                <th pSortableColumn="Estado">
+                    Estado <p-sortIcon field="Estado" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item let-ri="rowIndex">
+            <tr>
+                <td class="text-center">{{item.OrdenProduccion}}</td>
+                <td class="text-center">{{item.OrdenProduccionTaurus }}</td>
+                <td>{{item.NombreProductoEtimet }}</td>
+                <td>{{item.CodigoFinalProductoTerminado}}</td>
+                <td>
+                    <p-tag value="PENDIENTE" severity="secondary" *ngIf="item.Estado === 1"></p-tag>
+                    <p-tag value="ENVIADO" severity="success" *ngIf="item.Estado === 2"></p-tag>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>

@@ -1,0 +1,32 @@
+<div class="flex" *ngIf="cierreService.infoOP !== undefined && cierreService.infoProdTerm !== undefined">
+  <div class="flex flex-column gap-3">
+    <div class="flex flex-column">
+      <label class="">Orden de Producción</label>
+      <b class="font-bold flex-auto text-2xl">{{cierreService.infoOP.SecuencialOrdenProduccion}}</b>
+    </div>
+    <div class="flex flex-column">
+      <label class="">Nombre del producto</label>
+      <b class="font-bold flex-auto text-2xl">{{cierreService.infoOP.NombreTrabajo}}</b>
+    </div>
+    <div class="flex flex-column">
+      <label class="">Código nuevo</label>
+      <b class="font-bold flex-auto text-2xl">{{cierreService.infoOP.CodigoTrabajo}}</b>
+    </div>
+    <div class="flex flex-column">
+      <label class="">Código antiguo</label>
+      <b class="font-bold flex-auto text-2xl">{{cierreService.infoProdTerm.CodigoAntiguo}}</b>
+    </div>
+    <div class="flex flex-column">
+      <label class="">Cantidad a fabricar (Etiq / Rollo)</label>
+      <b class="font-bold flex-auto text-2xl">{{cierreService.infoOP.Cantidad | number: '0.0-2'}}</b>
+    </div>
+    <div class="flex flex-column">
+      <label class="">Gap Avance</label>
+      <b class="font-bold flex-auto text-2xl">{{cierreService.infoProdTerm.GapAvance | number: '0.0-2'}}</b>
+    </div>
+    <div class="flex flex-column">
+      <label class="">Gap Avance</label>
+      <b class="font-bold flex-auto text-2xl">{{cierreService.infoProdTerm.Gapancho | number: '0.0-2'}}</b>
+    </div>
+  </div>
+</div>

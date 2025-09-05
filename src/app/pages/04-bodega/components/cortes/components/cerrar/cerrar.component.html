@@ -1,0 +1,295 @@
+<app-blocked-send-info-database [blockedPanel]="blockedSendInfo"></app-blocked-send-info-database>
+<app-blocked-get-info-database [blockedPanel]="blockedGetInfo"></app-blocked-get-info-database>
+<div class="grid">
+    <div class="col-12 md:col-6">
+        <p-fieldset legend="Información de la orden de corte" *ngIf="infoDetalle !== undefined">
+            <div class="flex flex-column gap-3">
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Orden de corte</label>
+                    <b class="font-semibold flex-auto text-xl">{{infoCabecera.Secuencial}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Usuario</label>
+                    <b class="font-semibold flex-auto text-xl">{{infoCabecera.Usuario}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Código de barras</label>
+                    <b class="font-semibold flex-auto text-xl">{{infoDetalle.CodigoBarras}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Producto</label>
+                    <b class="font-semibold flex-auto text-xl">{{infoDetalle.DescripcionInventario}}</b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Largo (metros)</label>
+                    <b class="font-semibold flex-auto text-xl">
+                        {{infoDetalle.Largo}} <==> {{infoDetalle.LargoMedido}}
+                    </b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label for="proveedor" class="font-semibold w-10rem">Ancho (milimetros)</label>
+                    <b class="font-semibold flex-auto text-xl">
+                        {{infoDetalle.Ancho}} <==> {{infoDetalle.AnchoMedido}}
+                    </b>
+                </div>
+                <div class="flex align-items-center gap-3">
+                    <label class="font-semibold w-10rem">Cambiar medidas</label>
+                    <p-button icon="fa-solid fa-pencil" [raised]="true" (onClick)="onChangeMedidas()"></p-button>
+                </div>
+            </div>
+        </p-fieldset>
+    </div>
+    <div class="col-12 md:col-6">
+        <p-fieldset legend="Información de los cortes a generarse">
+            <p-table [value]="infoParadas" [responsive]="true" [scrollable]="true" scrollDirection="horizontal"
+                styleClass="p-datatable-sm">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Parada</th>
+                        <th>Largo (m)</th>
+                        <th>Anchos (mm)</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-parada let-ri="rowIndex">
+                    <tr>
+                        <td>{{ parada.Parada }}</td>
+                        <td>{{ parada.LargoCorte }}</td>
+                        <td>{{ parada.AnchoCorte }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-fieldset>
+    </div>
+    <div class="col-12 md:col-6">
+        <p-fieldset legend="Cortes generados">
+            <p-table [value]="listNuevosCortes" [responsive]="true" [scrollable]="true" scrollDirection="horizontal"
+                styleClass="p-datatable-sm">
+                <ng-template pTemplate="caption">
+                    <p-button icon="fa-solid fa-plus" severity="success" [raised]="true"
+                        (onClick)="onAddCorte()"></p-button>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>#</th>
+                        <th>Accion</th>
+                        <th>Parada</th>
+                        <th>Largo (m)</th>
+                        <th>Ancho (mm)</th>
+                        <th *ngIf="this.loginService.usuario.RoleName.indexOf('Administrador') !== -1">Peso Teorico (kg)
+                        </th>
+                        <th>Peso Real (kg)</th>
+                        <th>Ajuste</th>
+                        <th>Falla</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-corte let-ri="rowIndex">
+                    <tr>
+                        <td>{{ corte.Id }}</td>
+                        <td class="flex gap-3">
+                            <p-button icon="fa-solid fa-trash" pTooltip="Eliminar" tooltipPosition="bottom"
+                                [raised]="true" (onClick)="onDeleteCorte(corte)" severity="danger"></p-button>
+                            <p-button icon="fa-solid fa-pencil" pTooltip="Editar" tooltipPosition="bottom"
+                                [raised]="true" (onClick)="onEditCorte(corte)"></p-button>
+                        </td>
+                        <td>{{ corte.Parada }}</td>
+                        <td>{{ corte.Largo }}</td>
+                        <td>{{ corte.Ancho }}</td>
+                        <td *ngIf="this.loginService.usuario.RoleName.indexOf('Administrador') !== -1">{{
+                            corte.PesoTeorico | number: '0.2-4' }}</td>
+                        <td>{{ corte.PesoReal | number: '0.2-4' }}</td>
+                        <td>
+                            <p-tag *ngIf="corte.Ajuste" severity="success" value="Si" />
+                        </td>
+                        <td>
+                            <p-tag *ngIf="corte.Falla" severity="success" value="Si" />
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-fieldset>
+    </div>
+    <div class="col-12 md:col-6">
+        <p-fieldset legend="Calibraciones y ajustes">
+            <p-table [value]="listCalibracionAjustes" [responsive]="true" [scrollable]="true"
+                scrollDirection="horizontal" styleClass="p-datatable-sm">
+                <ng-template pTemplate="caption">
+                    <div class="flex gap-3">
+                        <p-button label="Calibracion" icon="fa-solid fa-plus" pTooltip="Agregar calibración"
+                            tooltipPosition="bottom" [raised]="true" (onClick)="onAddCalibracion()"></p-button>
+                        <p-button label="Ajuste" icon="fa-solid fa-plus" pTooltip="Agregar ajuste"
+                            tooltipPosition="bottom" [raised]="true" (onClick)="onAddAjuste()"></p-button>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>#</th>
+                        <th>Acción</th>
+                        <th>Largo (m)</th>
+                        <th>Ancho (mm)</th>
+                        <th>Corte</th>
+                        <th>Tipo</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-cortes let-ri="rowIndex">
+                    <tr>
+                        <td>{{(ri+1)}}</td>
+                        <td>
+                            <p-button icon="fa-solid fa-trash" severity="danger" [raised]="true"
+                                (onClick)="onDeleteCalibracionAjuste(cortes, ri)"></p-button>
+                        </td>
+                        <td>{{ cortes.Largo }}</td>
+                        <td>{{ cortes.Ancho }}</td>
+                        <td>{{ cortes.Corte }}</td>
+                        <td>{{ cortes.Tipo }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-fieldset>
+    </div>
+    <div class="col-12 md:col-6">
+        <p-fieldset legend="Calculos">
+            <div class="flex gap-3 justify-content-evenly">
+                <p-card subheader="Metros cuadrados reales">
+                    <p class="text-center">
+                        <b class="text-3xl text-center">{{m2Reales | number: '0.0-4'}}</b>
+                    </p>
+                </p-card>
+                <p-card subheader="Metros cuadrados distribuidos">
+                    <p class="text-center">
+                        <b class="text-3xl text-center">{{m2Distribuidos| number: '0.0-4'}}</b>
+                    </p>
+                </p-card>
+            </div>
+        </p-fieldset>
+    </div>
+    <div class="col-12 md:col-6">
+        <p-fieldset legend="Acciones">
+            <div class="flex justify-content-center">
+                <p-button icon="fa-solid fa-floppy-disk" label="Guardar" [raised]="true" severity="success"
+                    (onClick)="onCheckMetrosTotales()"></p-button>
+            </div>
+        </p-fieldset>
+    </div>
+</div>
+<!--MODAL MEDIDAS-->
+<p-dialog header="Cambiar valores de la bobina o corte" [modal]="true" [(visible)]="modalChangeMedidas"
+    [style]="{ width: '30rem' }">
+    <div class="mt-2">
+        <form [formGroup]="myFormMedidas" class="flex flex-column gap-3" (ngSubmit)="onSaveMedidas()">
+            <div class="flex align-items-center gap-2">
+                <label for="largoBobina" class="font-semibold w-9rem">Largo bobina (m)</label>
+                <p-inputNumber formControlName="largoBobina" [minFractionDigits]="0" mode="decimal" locale="en-US"
+                    currency="USD" [min]="0" />
+            </div>
+            <div class="flex justify-content-center gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL PARADAS-->
+<p-dialog header="Editar datos del nuevo corte" [modal]="true" [(visible)]="modalEditCorte"
+    [style]="{ width: '30rem' }">
+    <div class="mt-2">
+        <form [formGroup]="myFormEditCorte" class="flex flex-column gap-3" (ngSubmit)="onSaveEditCorte()">
+            <div class="flex align-items-center">
+                <label for="nuevoLargo" class="font-semibold w-9rem">Largo (m)</label>
+                <p-inputNumber formControlName="nuevoLargo" [minFractionDigits]="0" mode="decimal" locale="en-US"
+                    currency="USD" [min]="0" />
+            </div>
+            <div class="flex align-items-center">
+                <label for="nuevoPeso" class="font-semibold w-9rem">Peso Real (kg)</label>
+                <p-inputNumber formControlName="nuevoPeso" [minFractionDigits]="4" mode="decimal" locale="en-US"
+                    currency="USD" [min]="0" />
+            </div>
+            <div class="flex align-items-center">
+                <label for="existeFalla" class="font-semibold w-9rem">Existe falla</label>
+                <p-inputSwitch formControlName="existeFalla" />
+            </div>
+            <div class="flex justify-content-center gap-2">
+                <p-button label="Guardar" severity="success" icon="fa-solid fa-floppy-disk" [raised]="true"
+                    type="submit" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<p-dialog header="Agregar nuevo corte" [modal]="true" [(visible)]="modalAddCorte" [style]="{ width: '30rem' }">
+    <div class="mt-2">
+        <form [formGroup]="myFormAddCorte" class="flex flex-column gap-3" (ngSubmit)="onSaveAddCorte()">
+            <div class="flex align-items-center">
+                <label for="nuevoLargo" class="font-semibold w-9rem">Largo (m)</label>
+                <p-inputNumber formControlName="nuevoLargo" [minFractionDigits]="0" mode="decimal" locale="en-US"
+                    currency="USD" [min]="0" />
+            </div>
+            <div class="flex align-items-center">
+                <label for="nuevoLargo" class="font-semibold w-9rem">Ancho (mm)</label>
+                <p-inputNumber formControlName="nuevoAncho" [minFractionDigits]="0" mode="decimal" locale="en-US"
+                    currency="USD" [min]="0" />
+            </div>
+            <div class="flex align-items-center">
+                <label for="nuevoPeso" class="font-semibold w-9rem">Peso Real (kg)</label>
+                <p-inputNumber formControlName="nuevoPeso" [minFractionDigits]="4" mode="decimal" locale="en-US"
+                    currency="USD" [min]="0" />
+            </div>
+            <div class="flex align-items-center">
+                <label for="existeFalla" class="font-semibold w-9rem">Existe falla</label>
+                <p-inputSwitch formControlName="existeFalla" />
+            </div>
+            <div class="flex justify-content-center gap-2">
+                <p-button label="Guardar" severity="success" icon="fa-solid fa-floppy-disk" [raised]="true"
+                    type="submit" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL CALIBRACION-->
+<p-dialog header="Agregar calibración" [modal]="true" [(visible)]="modalCalibracion" [style]="{ width: '30rem' }">
+    <div class="mt-2">
+        <form [formGroup]="myFormCalibracion" class="flex flex-column gap-3" (ngSubmit)="onSaveCalibracion()">
+            <div class="flex align-items-center gap-2">
+                <label for="largoCalibracion" class="font-semibold w-9rem">Largo calibracion (m)</label>
+                <p-inputNumber formControlName="largoCalibracion" [minFractionDigits]="0" mode="decimal" locale="en-US"
+                    currency="USD" [min]="0" />
+            </div>
+            <div class="flex justify-content-center gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
+<!--MODAL AJUSTE-->
+<p-dialog header="Agregar ajuste" [modal]="true" [(visible)]="modalAjuste" [style]="{ width: '40rem'}"
+    [maximizable]="true">
+    <div class="mt-2">
+        <form [formGroup]="myFormAjuste" class="flex flex-column gap-3" (ngSubmit)="onSaveAjuste()">
+            <div class="flex align-items-center">
+                <label for="listCortes" class="font-semibold w-9rem">Id Corte</label>
+                <div class="flex-auto">
+                    <p-multiSelect [options]="listNuevosCortes" optionLabel="Id" placeholder="Escoja una opción"
+                        styleClass="w-full" formControlName="listCortes">
+                        <ng-template let-value pTemplate="selectedItems">
+                            <div class="inline-flex align-items-center gap-2 px-1" *ngFor="let item of value">
+                                <div>{{ item.Id }},</div>
+                            </div>
+                            <div *ngIf="!value || value.length === 0">Escoja una opción</div>
+                        </ng-template>
+                        <ng-template let-country pTemplate="item">
+                            <div class="flex align-items-center gap-2">
+                                <div>{{ country.Id }}</div>
+                            </div>
+                        </ng-template>
+                    </p-multiSelect>
+                </div>
+            </div>
+            <div class="flex align-items-center">
+                <label for="largoAjuste" class="font-semibold w-9rem">Largo Ajuste (m)</label>
+                <p-inputNumber formControlName="largoAjuste" [minFractionDigits]="0" mode="decimal" locale="en-US"
+                    currency="USD" />
+            </div>
+            <div class="flex h-1rem"></div>
+            <div class="flex justify-content-center gap-2">
+                <p-button label="Guardar" severity="success" type="submit" />
+            </div>
+        </form>
+    </div>
+</p-dialog>
